@@ -1,0 +1,168 @@
+/* Estilos personalizados para la página de inicio de sesión */
+
+body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    overflow: hidden;
+    height: 100%;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+}
+html {
+    height: 100%;
+}
+
+/* Logo de formulario de inicio de sesión */
+.register-logo {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    margin-left: 125px;
+    margin-right: auto;
+    border-radius: 6rem;
+}
+
+
+/* Título de formulario de inicio de sesión */
+.register-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    text-align: center;
+    color: #f9fafb;
+    letter-spacing: -0.3px;
+    margin-bottom: 4px;
+}
+.register-title span {
+    background: linear-gradient(90deg, #0d6efd, #20c997);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+}
+
+/* Subtítulo de formulario de inicio de sesión */
+.register-subtitle {
+    font-size: 0.9rem;
+    text-align: center;
+    color: #9ca3af;
+    
+    line-height: 1.5;
+    max-width: 320px;
+    margin: 0 auto 1.5rem auto;
+}
+.register-subtitle span {
+    color: #0d6efd;
+    font-weight: 500;
+}
+
+/* Estilos personalizados para los campos de entrada */
+.email-label, .password-label {
+    font-size: 0.85rem;
+    color: #9ca3af;
+    margin-bottom: 6px;
+}
+.email-input, .password-input {
+    border-radius: 12px;
+    padding: 12px 14px;
+
+    border: 1px solid #374151;
+    background-color: #1f2937;
+
+    font-size: 0.95rem;
+    color: #f9fafb;
+
+    transition: all 0.2s ease;
+}
+.email-input::placeholder, .password-input::placeholder {
+    color: #6b7280;
+}
+.email-input:hover, .password-input:hover {
+    border-color: #4b5563;
+    background-color: #1f2937;
+}
+.email-input:focus, .password-input:focus {
+    border-color: #0d6efd;
+    background-color: #1f2937;
+
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+}
+.email-input:valid, .password-input:valid {
+    border-color: #20c997;
+}
+.form-control:focus {
+    box-shadow: none;
+}
+
+/* Estilos personalizados para el botón de inicio de sesión */
+.btn-register {
+    border: none;
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #ffffff;
+    background: linear-gradient(90deg, #0d6efd, #20c997);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.25);
+}
+.btn-register:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(13, 110, 253, 0.3);
+}
+.btn-register:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 8px rgba(13, 110, 253, 0.2);
+}
+.btn-register:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.3);
+}
+.btn-register:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Estilos personalizados para la tarjeta de inicio de sesión */
+.register-card {
+    width: 100%;
+    max-width: 420px;
+    background-color: #111827;
+    border-radius: 20px;
+    box-shadow: 
+        0 10px 40px rgba(0, 0, 0, 0.4);
+
+    /* animación sutil al cargar */
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeInCard 0.5s ease forwards;
+}
+.register-card-body {
+    padding: 32px;
+}
+
+@keyframes fadeInCard {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Enlace a Login */
+.login-extra-text {
+    color: #9ca3af;
+    font-size: 0.85rem;
+}
+
+.login-link {
+    color: #3b82f6;
+    font-weight: 500;
+    text-decoration: none;
+    margin-left: 5px;
+}
+
+.login-link:hover {
+    text-decoration: underline;
+}
