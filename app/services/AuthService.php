@@ -1,104 +1,79 @@
 <?php
-// Métodos de autenticación: register, login, logout, me (obtener info del usuario autenticado).
+// Métodos de autenticación: register, login.
 
 class AuthService {
-    private PDO $db;
+    private PDO $pdo;
 
-    public function __construct(PDO $db) {
-        $this->db = $db;
+    public function __construct(PDO $pdo) {
+        $this->pdo = $pdo;
     }
 
     public function register($data) {
-        
-        $name = $data['name'] ?? null;
-        $email = $data['email'] ?? null;
-        $password = $data['password'] ?? null;
 
-        // Validación básica
+        $name = trim($data['name'] ?? '');
+        $email = strtolower(trim($data['email'] ?? ''));
+        $password = $data['password'] ?? '';
+
         if (!$name || !$email || !$password) {
-            return [
-                'status' => false,
-                'msg' => 'Datos incompletos'
-            ];
+            throw new Exception('Datos incompletos');
         }
 
-        // Verificar si el usuario ya existe
-        $stmt = $this->db->prepare("SELECT id FROM users WHERE email = ?");
+        if (strlen($name) < 3) {
+            throw new Exception('El nombre es muy corto');
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new Exception('Correo inválido');
+        }
+
+        if (strlen($password) < 8) {
+            throw new Exception('La contraseña debe tener al menos 8 caracteres');
+        }
+
+        $stmt = $this->pdo->prepare("SELECT id FROM users WHERE email = ?");
         $stmt->execute([$email]);
 
         if ($stmt->fetch()) {
-            return [
-                'status' => false,
-                'msg' => 'El correo ya está registrado'
-            ];
+            throw new Exception('El correo ya está registrado');
         }
 
-        // Encriptar contraseña
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-        // Insertar usuario
-        $stmt = $this->db->prepare("INSERT INTO users (name, email, password, role_id) 
-                                    VALUES (?, ?, ?, ?)");
+        try{
+            $stmt = $this->pdo->prepare("INSERT INTO users (name, email, password, role_id) 
+                                        VALUES (?, ?, ?, ?)");
 
-        $success = $stmt->execute([$name, $email, $hashedPassword, 2]);
-
-        if (!$success) {
-            return [
-                'status' => false,
-                'msg' => 'Error al registrar usuario'
-            ];
+            $stmt->execute([$name, $email, $hashedPassword, 2]);
+        } catch (PDOException $e) {
+            throw new Exception('Error al registrar usuario');
         }
 
-        return [
-            'status' => true,
-            'msg' => 'Registro exitoso'
-        ];
+        return [];
     }
 
     public function login($data) {
-        $email = $data['email'] ?? null;
-        $password = $data['password'] ?? null;
+        $email = strtolower(trim($data['email'] ?? ''));
+        $password = $data['password'] ?? '';
 
         if (!$email || !$password) {
-            return [
-                'status' => false,
-                'msg' => 'Datos incompletos'
-            ];
+            throw new Exception('Datos incompletos');
         };
 
-        $stmt = $this->db->prepare("SELECT * FROM users WHERE email = ?");
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new Exception('Correo inválido');
+        }
+
+        $stmt = $this->pdo->prepare("SELECT id, name, email, password, role_id 
+                                    FROM users 
+                                    WHERE email = ?");
+
         $stmt->execute([$email]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$user || !password_verify($password, $user['password'])) {
-            return [
-                'status' => false,
-                'msg' => 'Credenciales inválidas'
-            ];
+            throw new Exception('Credenciales inválidas');
         };
 
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['role_id'] = $user['role_id'];
-
-        return [
-            'status' => true, 
-            'msg' => 'Login exitoso'
-        ];
-    }
-
-    public function logout() {
-        session_destroy();
-        return ['success' => 'Logout exitoso'];
-    }
-
-    public function me() {
-        if (!isset($_SESSION['user_id'])) {
-            return ['error' => 'No autenticado'];
-        }
-
-        return [
-            'user_id' => $_SESSION['user_id'],
-            'role_id' => $_SESSION['role_id']
-        ];
+        return $user;
     }
 }

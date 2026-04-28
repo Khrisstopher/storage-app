@@ -1,0 +1,156 @@
+/* ===== Dashboard Layout ===== */
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    font-family: system-ui, -apple-system, sans-serif;
+    color: #f9fafb;
+}
+
+.dashboard-container {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 24px;
+}
+
+/* ===== Header ===== */
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.dashboard-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+}
+
+.dashboard-title span {
+    background: linear-gradient(90deg, #0d6efd, #20c997);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* ===== Usuario ===== */
+
+.dashboard-user {
+    margin-bottom: 20px;
+    color: #9ca3af;
+    font-size: 0.9rem;
+}
+
+.dashboard-user strong {
+    color: #f9fafb;
+    margin-left: 5px;
+}
+
+/* ===== Botón ===== */
+
+.btn-upload {
+    border: none;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #ffffff;
+    background: linear-gradient(90deg, #0d6efd, #20c997);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.25);
+}
+
+.btn-upload:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(13, 110, 253, 0.3);
+}
+
+/* ===== Sección archivos ===== */
+
+.files-section {
+    background-color: #111827;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* ===== Estado vacío ===== */
+
+.empty-state {
+    text-align: center;
+    color: #9ca3af;
+    padding: 40px 0;
+}
+
+/* ===== Grid archivos ===== */
+
+.files-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+/* ===== Tarjeta archivo ===== */
+
+.file-card {
+    background-color: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 16px;
+    padding: 16px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.file-card:hover {
+    border-color: #4b5563;
+    transform: translateY(-2px);
+}
+
+/* Nombre archivo */
+
+.file-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #f9fafb;
+    margin-bottom: 10px;
+    word-break: break-word;
+}
+
+/* Acciones */
+
+.file-actions {
+    display: flex;
+    justify-content: space-between;
+}
+
+.file-actions button {
+    border: none;
+    background: none;
+    color: #9ca3af;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.file-actions button:hover {
+    color: #3b82f6;
+}
+
+/* ===== Animación ===== */
+@keyframes fadeInCard {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.file-card {
+    animation: fadeInCard 0.3s ease;
+}

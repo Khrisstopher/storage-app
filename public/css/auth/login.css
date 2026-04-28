@@ -90,8 +90,14 @@ html {
 .email-input:valid, .password-input:valid {
     border-color: #20c997;
 }
+
+/* Inputs del formulario */
 .form-control:focus {
     box-shadow: none;
+}
+.form-control {
+    color: #f9fafb !important;
+    background-color: #1f2937 !important;
 }
 
 /* Estilos personalizados para el botón de inicio de sesión */

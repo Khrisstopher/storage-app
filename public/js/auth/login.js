@@ -1,6 +1,4 @@
 const form = document.getElementById('login-form');
-const alertError = document.getElementById('alert-error');
-const btnSubmit = document.getElementById('btn-submit');
 
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -10,34 +8,40 @@ form.addEventListener('submit', async (e) => {
         return;
     }
 
-    const formData = new FormData(form);
-    formData.append('action', 'login');
+    const formData = {
+        email: form.email.value,
+        password: form.password.value
+    }
 
     try {
 
         const response = await fetch(BASE_URL + 'auth/login', {
             method: 'POST',
-            body: formData
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
         });
 
-        const data = await response.json();
+        const responseData = await response.json();
 
-        if (data.status) {
-            Toast.fire({
+        if (responseData.status) {
+            await Toast.fire({
                 icon: 'success',
-                title: data.msg
+                title: responseData.msg
             });
+            window.location.href = BASE_URL + 'dashboard';
         } else {
             Toast.fire({
                 icon: 'error',
-                title: data.msg
+                title: responseData.msg
             });
         }
 
     } catch (err) {
         Toast.fire({
             icon: 'error',
-            title: data.msg
+            title: 'Ocurrió un error al procesar tu solicitud. Por favor, inténtalo de nuevo.'
         });
     }
 });

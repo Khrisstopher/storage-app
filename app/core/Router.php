@@ -1,34 +1,72 @@
 <?php
 
+require_once __DIR__ . '/../../config/db_connection.php';
+
 class Router {
 
     private $routes = [
-        // Rutas para páginas
-        ''          => ['PageController', 'home'],
-        'home'      => ['PageController', 'home'],
-        'login'     => ['PageController', 'login'],
-        'register'  => ['PageController', 'register'],
+        // [Carpeta, Controlador, Método, Verbo]
 
-        // NUEVAS rutas para lógica
-        'auth/register' => ['AuthController', 'handleRequest'],
-        'auth/login'    => ['AuthController', 'handleRequest'],
+        // Rutas para vistas (web)
+        ''          => ['web','PageController', 'home', 'GET'],
+        'home'      => ['web','PageController', 'home', 'GET'],
+        'login'     => ['web','PageController', 'login', 'GET'],
+        'register'  => ['web','PageController', 'register', 'GET'],
+        'dashboard' => ['web','DashboardController', 'dashboard', 'GET'],
+
+        // Rutas para lógica de negocio (API)
+        'auth/register' => ['api','AuthController', 'register', 'POST'],
+        'auth/login'    => ['api','AuthController', 'login', 'POST'],
+        'files/list'    => ['api','FileController', 'list', 'GET'],
+        'files/upload'  => ['api','FileController', 'upload', 'POST']
     ];
 
+    private function jsonResponse($status, $msg, $code = 200) {
+        http_response_code($code);
+        header('Content-Type: application/json');
+        echo json_encode([
+            'status' => $status,
+            'msg' => $msg
+        ]);
+        exit;
+    }
+
     public function dispatch() {
+
+        // Inicializo la sesión en el punto de entrada de la aplicación 
+        // para garantizar disponibilidad global y evitar duplicación en los controladores.
+        session_start();
 
         $url = trim($_GET['url'] ?? '', '/');
 
         if (!array_key_exists($url, $this->routes)) {
-            http_response_code(404);
-            die("404 - Página no encontrada");
+            $this->jsonResponse(false, 'Ruta no encontrada', 404);
         }
 
-        [$controllerName, $method] = $this->routes[$url]; // Asigna el controlador y método a las variables según la ruta
+        // Asigna el controlador y método a las variables según la ruta
+        [$folder, $controllerName, $method, $httpMethod] = $this->routes[$url];
 
-        require_once __DIR__ . '/../controllers/' . $controllerName . '.php'; // Carga el archivo del controlador
+        if ($_SERVER['REQUEST_METHOD'] !== $httpMethod) {
+            $this->jsonResponse(false, 'Método no permitido', 405);
+        }
+        
+        require_once __DIR__ . "/../controllers/$folder/$controllerName.php";
 
-        $controller = new $controllerName(); // Instancia el controlador
+        // Verifica que la clase del controlador exista y que el método esté implementado
+        if (!class_exists($controllerName)) {
+            $this->jsonResponse(false, 'Controlador no encontrado', 500);
+        }
+        if (!method_exists($controllerName, $method)) {
+            $this->jsonResponse(false, 'Método no implementado', 500);
+        }
 
-        $controller->$method(); // Ejecuta el método correspondiente
+        $database = new Database();
+        $pdo = $database->getConnection();
+
+        // Instancia el controlador pasándole la conexión PDO
+        $controller = new $controllerName($pdo);
+
+        // Ejecuta el método correspondiente
+        $controller->$method(); 
     }
 }

@@ -1,6 +1,4 @@
 const form = document.getElementById('register-form');
-const alertError = document.getElementById('alert-error');
-const btnSubmit = document.getElementById('btn-submit');
 
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -10,27 +8,35 @@ form.addEventListener('submit', async (e) => {
         return;
     }
 
-    const formData = new FormData(form);
-    formData.append('action', 'register');
+    const formData = { // Recopilamos los datos del formulario en un objeto JSON
+        name: form.name.value,
+        email: form.email.value,
+        password: form.password.value
+    };
 
     try {
 
         const response = await fetch(BASE_URL + 'auth/register', {
             method: 'POST',
-            body: formData
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+
         });
 
-        const data = await response.json();
+        const responseData = await response.json();
 
-        if (data.status) {
-            Toast.fire({
+        if (responseData.status) {
+            await Toast.fire({
                 icon: 'success',
-                title: data.msg
+                title: responseData.msg
             });
+            window.location.href = BASE_URL + 'login';
         } else {
             Toast.fire({
                 icon: 'error',
-                title: data.msg
+                title: responseData.msg
             });
         }
 
