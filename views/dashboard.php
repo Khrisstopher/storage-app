@@ -5,6 +5,9 @@
         <h1 class="dashboard-title">Gestión de archivos</h1>
         <input type="file" id="file-input" class="d-none">
         <button id="btn-upload" class="btn-upload">Subir archivo</button>
+        <button id="btn-logout" class="btn btn-outline-light btn-sm">
+            <i class="bi bi-box-arrow-right"></i> Salir
+        </button>
     </div>
 
     <!-- Info usuario -->
@@ -22,7 +25,7 @@
         </div>
 
         <!-- Lista de archivos -->
-        <div id="files-container" class="files-grid">
+        <div id="files-container" class="files-grid d-grid gap-3"></div>
             <!-- JS renderiza aquí -->
         </div>
 

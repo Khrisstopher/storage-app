@@ -44,4 +44,23 @@ class FileController extends Controller {
             $this->response(false, $e->getMessage());
         }
     }
+
+    public function delete() {
+        try {
+            $this->requireAuth();
+
+            if (!isset($_POST['id'])) {
+                throw new Exception('ID no recibido');
+            }
+
+            $userId = $_SESSION['user_id'];
+
+            $this->fileService->delete((int)$_POST['id'], $userId);
+
+            $this->response(true, 'Archivo eliminado correctamente');
+
+        } catch (Exception $e) {
+            $this->response(false, $e->getMessage());
+        }
+    }
 }

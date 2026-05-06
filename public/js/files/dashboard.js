@@ -1,7 +1,11 @@
 // #### Funcionalidad para listar archivos ####
+
+let container = null;
+let emptyState = null;
+
 document.addEventListener('DOMContentLoaded', async () => {
-    const container = document.getElementById('files-container');
-    const emptyState = document.getElementById('empty-state');
+    container = document.getElementById('files-container');
+    emptyState = document.getElementById('empty-state');
 
     try {
         const response = await fetch(BASE_URL + 'files/list');
@@ -17,21 +21,40 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             responseData.data.forEach(file => {
                 const card = document.createElement('div');
+                const ext = file.name.split('.').pop().toLowerCase();
+                const icon = getFileIcon(ext);
+
                 card.className = 'file-card';
+
                 card.innerHTML = `
-                    <div class="file-name">${file.name}</div>
+                    <div class="d-flex align-items-center gap-3 mb-2">
+
+                        <i class="bi ${icon} fs-3"></i>
+
+                        <div class="flex-grow-1 overflow-hidden">
+                            <div class="fw-semibold text-truncate">${file.name}</div>
+                            <div class="small file-size">${file.size}</div>
+                        </div>
+
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${file.id}">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
                 `;
                 container.appendChild(card);
             });
         } else {
-            toast.fire({
+            Toast.fire({
                 icon: 'error',
                 title: responseData.msg
             });
         }
 
     } catch (err) {
-        toast.fire({
+        Toast.fire({
             icon: 'error',
             title: 'Ocurrió un error al cargar tus archivos. Por favor, inténtalo de nuevo.'
         });
@@ -65,30 +88,127 @@ fileInput.addEventListener('change', async () => {
         const responseData = await response.json();
 
         if (!responseData.status) {
-            throw new Error(responseData.msg);
+            Toast.fire({
+                icon: 'error',
+                title: responseData.msg
+            });
+            return;
         }
 
-        toast.fire({
+        Toast.fire({
             icon: 'success',
             title: responseData.msg
         });
         
         // Mostrar el nuevo archivo en la lista
         const card = document.createElement('div');
+        const ext = file.name.split('.').pop().toLowerCase();
+        const icon = getFileIcon(ext);
+
         card.className = 'file-card';
+
         card.innerHTML = `
-            <div class="file-name">${file.name}</div>
+            <div class="d-flex align-items-center gap-3 mb-2">
+
+                <i class="bi ${icon} fs-3"></i>
+
+                <div class="flex-grow-1 overflow-hidden">
+                    <div class="fw-semibold text-truncate">${file.name}</div>
+                    <div class="small file-size">${file.size} KB</div>
+                </div>
+
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${responseData.data.id}">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
         `;
 
-        // Agregar al contenedor
-        container.prepend(card); // mejor arriba (tipo "nuevo primero")
+        // Agregar al contenedor en la primera posición
+        container.prepend(card);
         
         emptyState.classList.add('d-none');
+        console.error("ID del nuevo archivo:", responseData.data.id);
         
     } catch (err) {
-        toast.fire({
+        Toast.fire({
             icon: 'error',
             title: 'Error al subir archivo'
+        });
+    } finally {
+        // Limpiar el input para permitir subir el mismo archivo nuevamente si se desea
+        fileInput.value = '';
+    }
+});
+
+
+// #### Funcionalidad para eliminar archivos ####
+document.addEventListener('click', async (e) => {
+
+    const btn = e.target.closest('.btn-delete');
+    if (!btn) return;
+
+    const id = btn.dataset.id;
+
+    if (!id) {
+        console.error('ID no encontrado');
+        return;
+    }
+
+    const result = await Swal.fire({
+        title: '¿Eliminar archivo?',
+        text: 'Esta acción no se puede deshacer',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    });
+
+    if (!result.isConfirmed) return;
+
+    const formData = new FormData();
+    formData.append('id', id);
+
+    try {
+        const response = await fetch(BASE_URL + 'files/delete', {
+            method: 'POST',
+            body: formData
+        });
+
+        const text = await response.text();
+
+        let responseData;
+        try {
+            responseData = JSON.parse(text);
+        } catch {
+            throw new Error('Respuesta inválida del servidor');
+        }
+
+        if (!responseData.status) throw new Error(responseData.msg);
+
+        const card = btn.closest('.file-card');
+        if (card) card.remove();
+
+        if (!container.children.length) {
+            emptyState.classList.remove('d-none');
+        }
+
+        Toast.fire({
+            icon: 'success',
+            title: responseData.msg
+        });
+
+    } catch (err) {
+
+        console.error(err);
+
+        Toast.fire({
+            icon: 'error',
+            title: 'Error al eliminar archivo'
         });
     }
 });

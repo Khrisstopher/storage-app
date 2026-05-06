@@ -88,9 +88,7 @@ body {
 /* ===== Grid archivos ===== */
 
 .files-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 }
 
 /* ===== Tarjeta archivo ===== */
@@ -109,6 +107,8 @@ body {
     transform: translateY(-2px);
 }
 
+
+
 /* Nombre archivo */
 
 .file-name {
@@ -117,6 +117,10 @@ body {
     color: #f9fafb;
     margin-bottom: 10px;
     word-break: break-word;
+}
+.file-size {
+    font-size: 0.8rem;
+    color: #f0f1f3;
 }
 
 /* Acciones */

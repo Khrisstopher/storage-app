@@ -42,4 +42,17 @@ class AuthController extends Controller {
             $this->response(false, $e->getMessage());
         }
     }
+    public function logout() {
+        try {
+            // Limpiar variables de sesión
+            $_SESSION = [];
+
+            session_destroy();
+
+            $this->response(true, 'Sesión cerrada correctamente');
+
+        } catch (Exception $e) {
+            $this->response(false, 'Error al cerrar sesión');
+        }
+    }
 }

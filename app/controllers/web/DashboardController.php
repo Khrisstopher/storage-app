@@ -12,7 +12,10 @@ class DashboardController extends Controller {
             'title' => 'Dashboard - Storage App',
             'styles' => 'css/files/dashboard.css',
             'user_name' => $_SESSION['user_name'] ?? 'Usuario',
-            'scripts' => 'js/files/dashboard.js'
+            'scripts' => [
+                'js/files/dashboard.js',
+                'js/auth/auth.js'
+            ]
         ]);
     }
 }

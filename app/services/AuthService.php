@@ -39,11 +39,14 @@ class AuthService {
 
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-        try{
-            $stmt = $this->pdo->prepare("INSERT INTO users (name, email, password, role_id) 
-                                        VALUES (?, ?, ?, ?)");
+        // Este código único es para guardar el archivo en carpetas separadas por usuario, sin exponer el ID real
+        $userExternalId = bin2hex(random_bytes(16));
 
-            $stmt->execute([$name, $email, $hashedPassword, 2]);
+        try{
+            $stmt = $this->pdo->prepare("INSERT INTO users (external_id, name, email, password, role_id) 
+                                        VALUES (?, ?, ?, ?, ?)");
+
+            $stmt->execute([$userExternalId, $name, $email, $hashedPassword, 2]);
         } catch (PDOException $e) {
             throw new Exception('Error al registrar usuario');
         }

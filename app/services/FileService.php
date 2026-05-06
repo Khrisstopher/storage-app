@@ -20,7 +20,137 @@ class FileService {
         return $bytes . ' B';
     }
 
-    // Listar archivos del usuario
+    private function validateUpload(array $file): void {
+        if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
+            throw new Exception('Archivo con error o no recibido');
+        }
+    }
+
+    private function getExtension(string $filename): string {
+        return strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+    }
+
+    private function validateExtension(string $extension, array $blocked): void {
+        if (in_array($extension, $blocked)) {
+            throw new Exception("El tipo de archivo .$extension no está permitido");
+        }
+    }
+
+    private function generateFileName(string $extension): string {
+        return uniqid('', true) . '.' . $extension;
+    }
+
+    private function validateZip(string $tmpPath, array $blockedExtensions): void {
+
+        if (!class_exists('ZipArchive')) {
+            throw new Exception('El servidor no tiene habilitada la función para revisar archivos ZIP.');
+        }
+
+        $zip = new ZipArchive();
+
+        if ($zip->open($tmpPath) !== TRUE) {
+            throw new Exception('No se pudo analizar el archivo ZIP');
+        }
+
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $fileInside = $zip->getNameIndex($i);
+            $extInside = strtolower(pathinfo($fileInside, PATHINFO_EXTENSION));
+
+            if (in_array($extInside, $blockedExtensions)) {
+                $zip->close();
+                throw new Exception("El archivo '$fileInside' dentro del ZIP no está permitido");
+            }
+        }
+
+        $zip->close();
+    }
+
+    private function validateQuota(int $userId, int $fileSize): void {
+        // 1. Buscamos en la tabla 'files' cuánto espacio ha ocupado este ID
+        $stmt = $this->pdo->prepare("SELECT COALESCE(SUM(file_size), 0) 
+                                    FROM files 
+                                    WHERE user_id = ?");
+        $stmt->execute([$userId]);
+
+        $used = (int) $stmt->fetchColumn();
+        
+        // 2. Definimos el límite de 10MB de forma legible
+        $limit = 10 * 1024 * 1024; 
+
+        // 3. La prueba de fuego
+        if (($used + $fileSize) > $limit) {
+            // Calculamos cuánto falta para que el mensaje sea más amable
+            $available = ($limit - $used) / (1024 * 1024);
+            $availableFormatted = number_format($available, 2);
+            
+            throw new Exception("Cuota excedida. Solo te quedan {$availableFormatted} MB disponibles.");
+        }
+    }
+
+    // Guardar archivo en el servidor
+    private function storeFile(string $tmpPath, string $newName, string $userExternalId): string {
+        $dir = __DIR__ . '/../../storage/uploads/' . $userExternalId . '/';
+
+        if (!is_dir($dir)) {
+            // El 'true' permite crear carpetas anidadas automáticamente
+            mkdir($dir, 0777, true);
+        }
+
+        $destination = $dir . $newName;
+
+        if (!move_uploaded_file($tmpPath, $destination)) {
+            throw new Exception('Error al guardar el archivo en tu carpeta personal');
+        }
+
+        return $destination;
+    }
+
+    // Guardar metadata del archivo en la base de datos
+    private function saveFile(
+        int $userId,
+        string $newName,
+        string $originalName,
+        string $path,
+        int $size,
+        string $extension): int {
+
+        $stmt = $this->pdo->prepare("INSERT INTO files 
+                                    (user_id, filename, original_name, file_path, file_size, file_type)
+                                    VALUES (?, ?, ?, ?, ?, ?)");
+
+        $stmt->execute([
+            $userId,
+            $newName,
+            $originalName,
+            $path,
+            $size,
+            $extension
+        ]);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    private function getUserExternalId(int $userId): string {
+        $stmt = $this->pdo->prepare("SELECT external_id FROM users WHERE id = ?");
+        $stmt->execute([$userId]);
+
+        $externalId = $stmt->fetchColumn();
+
+        if (!$externalId) {
+            throw new Exception('Usuario no encontrado');
+        }
+
+        return $externalId;
+    }
+
+    private function getBlockedExtensions(): array {
+
+        $stmt = $this->pdo->query("SELECT extension FROM blocked_extensions");
+
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    // #### Funciones públicas para el controlador ####
     public function listByUser($userId) {
 
         try{
@@ -45,101 +175,90 @@ class FileService {
         }
     }
 
-    // Subir nuevo archivo
-    public function upload($file, $userId) {
+    public function upload(array $file, int $userId): array {
 
-        // 1. Validar que el archivo exista
-        if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
-            throw new Exception('Error al subir el archivo');
-        }
+        $this->validateUpload($file);
 
-        // 2. Datos básicos
         $originalName = $file['name'];
         $tmpPath = $file['tmp_name'];
-        $fileSize = $file['size'];
+        $size = $file['size'];
 
-        // 3. Obtener extensión
-        $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+        $extension = $this->getExtension($originalName);
 
-        // 4. Validar extensiones prohibidas
-        $blockedExtensions = ['exe', 'bat', 'js', 'php', 'sh'];
+        $blocked = $this->getBlockedExtensions();
 
-        if (in_array($extension, $blockedExtensions)) {
-            throw new Exception("El tipo de archivo .$extension no está permitido");
-        }
+        $this->validateExtension($extension, $blocked);
 
-        // 5. Validar ZIP
         if ($extension === 'zip') {
-            $zip = new ZipArchive();
+            $this->validateZip($tmpPath, $blocked);
+        }
 
-            if ($zip->open($tmpPath) === TRUE) {
+        $this->validateQuota($userId, $size);
 
-                for ($i = 0; $i < $zip->numFiles; $i++) {
-                    $fileInside = $zip->getNameIndex($i);
-                    $extInside = strtolower(pathinfo($fileInside, PATHINFO_EXTENSION));
+        $newName = $this->generateFileName($extension);
 
-                    if (in_array($extInside, $blockedExtensions)) {
-                        $zip->close();
-                        throw new Exception("El archivo '$fileInside' dentro del ZIP no está permitido");
-                    }
-                }
+        $userExternalId = $this->getUserExternalId($userId);
 
-                $zip->close();
-            } else {
-                throw new Exception('No se pudo analizar el archivo ZIP');
+        $path = null;
+
+        try {
+            $path = $this->storeFile($tmpPath, $newName, $userExternalId);
+
+            $fileId = $this->saveFile(
+                $userId,
+                $newName,
+                $originalName,
+                $path,
+                $size,
+                $extension
+            );
+
+        } catch (Exception $e) {
+            if ($path && file_exists($path)) {
+                unlink($path);
             }
+            throw $e;
         }
 
-        // 6. Validar cuota (versión básica por ahora)
-        $stmt = $this->pdo->prepare("SELECT COALESCE(SUM(file_size), 0) as total 
-                                    FROM files 
-                                    WHERE user_id = ?");
-        $stmt->execute([$userId]);
-        $usedSpace = (int) $stmt->fetchColumn();
-
-        $maxQuota = 10 * 1024 * 1024; // 10MB (luego lo haces dinámico)
-
-        if (($usedSpace + $fileSize) > $maxQuota) {
-            throw new Exception('Cuota de almacenamiento excedida (10MB)');
-        }
-
-        // 7. Generar nombre único
-        $newName = uniqid() . '.' . $extension;
-
-        // 8. Ruta destino
-        $uploadDir = __DIR__ . '/../../storage/uploads/';
-
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
-        }
-
-        $destination = $uploadDir . $newName;
-
-        // 9. Mover archivo
-        if (!move_uploaded_file($tmpPath, $destination)) {
-            throw new Exception('Error al guardar el archivo');
-        }
-
-        // 10. Guardar en DB
-        $stmt = $this->pdo->prepare("INSERT INTO files (user_id, filename, original_name, file_path, file_size, file_type)
-                                    VALUES (?, ?, ?, ?, ?, ?)");
-
-        $stmt->execute([
-            $userId,
-            $newName,
-            $originalName,
-            $destination,
-            $fileSize,
-            $extension
-        ]);
-
-        $fileId = $this->pdo->lastInsertId();
-
-        // 11. Respuesta
         return [
             'id' => $fileId,
             'name' => $originalName,
-            'size' => $fileSize
+            'size' => $size
         ];
+    }
+
+    public function delete(int $fileId, int $userId): void {
+
+        $stmt = $this->pdo->prepare("
+            SELECT file_path 
+            FROM files 
+            WHERE id = ? AND user_id = ?
+        ");
+        $stmt->execute([$fileId, $userId]);
+
+        $file = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$file) {
+            throw new Exception('Archivo no encontrado o no autorizado');
+        }
+
+        $this->pdo->beginTransaction();
+
+        try {
+            // 2. Eliminar de la base de datos
+            $stmt = $this->pdo->prepare("DELETE FROM files WHERE id = ?");
+            $stmt->execute([$fileId]);
+
+            // 3. Eliminar del filesystem
+            if (file_exists($file['file_path'])) {
+                unlink($file['file_path']);
+            }
+
+            $this->pdo->commit();
+
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            throw new Exception('Error al eliminar el archivo');
+        }
     }
 }

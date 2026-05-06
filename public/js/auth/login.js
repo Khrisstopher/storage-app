@@ -26,10 +26,6 @@ form.addEventListener('submit', async (e) => {
         const responseData = await response.json();
 
         if (responseData.status) {
-            await Toast.fire({
-                icon: 'success',
-                title: responseData.msg
-            });
             window.location.href = BASE_URL + 'dashboard';
         } else {
             Toast.fire({

@@ -17,8 +17,14 @@ class Router {
         // Rutas para lógica de negocio (API)
         'auth/register' => ['api','AuthController', 'register', 'POST'],
         'auth/login'    => ['api','AuthController', 'login', 'POST'],
+        'auth/logout'   => ['api','AuthController', 'logout', 'POST'],
         'files/list'    => ['api','FileController', 'list', 'GET'],
-        'files/upload'  => ['api','FileController', 'upload', 'POST']
+        'files/upload'  => ['api','FileController', 'upload', 'POST'],
+        'files/delete'  => ['api','FileController', 'delete', 'POST'],
+
+        // Rutas para configuración de administración
+        'admin/settings/file-restrictions'      => ['api','AdminSettingsController', 'fileRestrictions', 'GET'],
+        'admin/settings/file-restrictions/save' => ['api','AdminSettingsController', 'saveFileRestrictions', 'POST'],
     ];
 
     private function jsonResponse($status, $msg, $code = 200) {

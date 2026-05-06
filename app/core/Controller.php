@@ -36,7 +36,15 @@ class Controller {
     // Verificar que el usuario esté autenticado, redirigiendo a login si no lo está
     protected function requireAuth() {
         if (!isset($_SESSION['user_id'])) {
-            header('Location: /login');
+            header('Location: ' . BASE_URL . 'login');
+            exit;
+        }
+    }
+
+    // No permitir acceso a esta página si el usuario ya está autenticado, redirigiendo a dashboard
+    protected function requireGuest() {
+        if (isset($_SESSION['user_id'])) {
+            header('Location: ' . BASE_URL . 'dashboard');
             exit;
         }
     }
