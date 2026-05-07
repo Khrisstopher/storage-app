@@ -165,3 +165,8 @@ Panel principal del usuario donde puede visualizar y gestionar sus archivos.
 ![Dashboard](docs/screenshots/dashboard.png)
 
 ---
+
+### Panel de administración
+
+Restricción de tipos de archivos
+![admin/settings](docs/screenshots/adminSettings.png)
