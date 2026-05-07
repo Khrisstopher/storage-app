@@ -8,23 +8,28 @@ class Router {
         // [Carpeta, Controlador, Método, Verbo]
 
         // Rutas para vistas (web)
-        ''          => ['web','PageController', 'home', 'GET'],
-        'home'      => ['web','PageController', 'home', 'GET'],
-        'login'     => ['web','PageController', 'login', 'GET'],
-        'register'  => ['web','PageController', 'register', 'GET'],
-        'dashboard' => ['web','DashboardController', 'dashboard', 'GET'],
+        ''                  => ['web','PageController', 'home', 'GET'],
+        'home'              => ['web','PageController', 'home', 'GET'],
+        'login'             => ['web','PageController', 'login', 'GET'],
+        'register'          => ['web','PageController', 'register', 'GET'],
+        'dashboard'         => ['web','DashboardController', 'dashboard', 'GET'],
+        'admin/settings'    => ['web','AdminSettingsController', 'index', 'GET'],
 
         // Rutas para lógica de negocio (API)
+
+        // Rutas para autenticación
         'auth/register' => ['api','AuthController', 'register', 'POST'],
         'auth/login'    => ['api','AuthController', 'login', 'POST'],
         'auth/logout'   => ['api','AuthController', 'logout', 'POST'],
+
+        // Rutas para gestión de archivos
         'files/list'    => ['api','FileController', 'list', 'GET'],
         'files/upload'  => ['api','FileController', 'upload', 'POST'],
         'files/delete'  => ['api','FileController', 'delete', 'POST'],
 
         // Rutas para configuración de administración
-        'admin/settings/file-restrictions'      => ['api','AdminSettingsController', 'fileRestrictions', 'GET'],
-        'admin/settings/file-restrictions/save' => ['api','AdminSettingsController', 'saveFileRestrictions', 'POST'],
+        'settings/file-restrictions'      => ['api','AdminSettingsController', 'fileRestrictions', 'GET'],
+        'settings/file-restrictions/save' => ['api','AdminSettingsController', 'saveFileRestrictions', 'POST'],
     ];
 
     private function jsonResponse($status, $msg, $code = 200) {

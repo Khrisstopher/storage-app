@@ -9,17 +9,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
         const response = await fetch(BASE_URL + 'files/list');
-        const responseData = await response.json();
+        
+        const result = await response.json().catch(() => {
+            throw new Error('Respuesta no válida del servidor');
+        });
 
-        if (responseData.status) {
-            if (!responseData.data ||!responseData.data.length) {
+        if (result.status) {
+            if (!result.data || !result.data.length) {
                 emptyState.classList.remove('d-none');
                 return;
             }
 
             emptyState.classList.add('d-none');
 
-            responseData.data.forEach(file => {
+            result.data.forEach(file => {
                 const card = document.createElement('div');
                 const ext = file.name.split('.').pop().toLowerCase();
                 const icon = getFileIcon(ext);
@@ -47,16 +50,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 container.appendChild(card);
             });
         } else {
-            Toast.fire({
-                icon: 'error',
-                title: responseData.msg
-            });
+            throw new Error(result.message);
         }
 
     } catch (err) {
         Toast.fire({
             icon: 'error',
-            title: 'Ocurrió un error al cargar tus archivos. Por favor, inténtalo de nuevo.'
+            title: err.message || 'Error de conexión con el servidor'
         });
     }
 });
@@ -85,20 +85,19 @@ fileInput.addEventListener('change', async () => {
             body: formData
         });
 
-        const responseData = await response.json();
+        const result = await response.json().catch(() => {
+            throw new Error('Respuesta no válida del servidor');
+        });
 
-        if (!responseData.status) {
-            Toast.fire({
-                icon: 'error',
-                title: responseData.msg
-            });
-            return;
+        if (!result.status) {
+            throw new Error(result.message);
         }
 
         Toast.fire({
             icon: 'success',
-            title: responseData.msg
+            title: result.message
         });
+        console.error("Respuesta del servidor:", result);
         
         // Mostrar el nuevo archivo en la lista
         const card = document.createElement('div');
@@ -120,7 +119,7 @@ fileInput.addEventListener('change', async () => {
             </div>
 
             <div class="d-flex justify-content-end">
-                <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${responseData.data.id}">
+                <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${result.data.id}">
                     <i class="bi bi-trash"></i>
                 </button>
             </div>
@@ -130,15 +129,14 @@ fileInput.addEventListener('change', async () => {
         container.prepend(card);
         
         emptyState.classList.add('d-none');
-        console.error("ID del nuevo archivo:", responseData.data.id);
+        console.error("ID del nuevo archivo:", result.data.id);
         
     } catch (err) {
         Toast.fire({
             icon: 'error',
-            title: 'Error al subir archivo'
+            title: err.message || 'Error de conexión con el servidor'
         });
     } finally {
-        // Limpiar el input para permitir subir el mismo archivo nuevamente si se desea
         fileInput.value = '';
     }
 });
@@ -157,7 +155,7 @@ document.addEventListener('click', async (e) => {
         return;
     }
 
-    const result = await Swal.fire({
+    const confirmation = await Swal.fire({
         title: '¿Eliminar archivo?',
         text: 'Esta acción no se puede deshacer',
         icon: 'warning',
@@ -168,7 +166,7 @@ document.addEventListener('click', async (e) => {
         cancelButtonText: 'Cancelar'
     });
 
-    if (!result.isConfirmed) return;
+    if (!confirmation.isConfirmed) return;
 
     const formData = new FormData();
     formData.append('id', id);
@@ -179,16 +177,11 @@ document.addEventListener('click', async (e) => {
             body: formData
         });
 
-        const text = await response.text();
+        const result = await response.json().catch(() => { 
+            throw new Error('Respuesta no válida del servidor');
+        });
 
-        let responseData;
-        try {
-            responseData = JSON.parse(text);
-        } catch {
-            throw new Error('Respuesta inválida del servidor');
-        }
-
-        if (!responseData.status) throw new Error(responseData.msg);
+        if (!result.status) throw new Error(result.message);
 
         const card = btn.closest('.file-card');
         if (card) card.remove();
@@ -199,16 +192,13 @@ document.addEventListener('click', async (e) => {
 
         Toast.fire({
             icon: 'success',
-            title: responseData.msg
+            title: result.message
         });
 
     } catch (err) {
-
-        console.error(err);
-
         Toast.fire({
             icon: 'error',
-            title: 'Error al eliminar archivo'
+            title: err.message || 'Error en la conexión con el servidor'
         });
     }
 });

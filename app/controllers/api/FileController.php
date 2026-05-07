@@ -21,7 +21,7 @@ class FileController extends Controller {
 
             $this->response(true, 'Archivos consultados con exito.', $files);
         } catch (Exception $e) {
-            $this->response(false, $e->getMessage());
+            $this->logError($e, "LIST_ARCHIVOS");
         }
     }
 
@@ -41,7 +41,7 @@ class FileController extends Controller {
             $this->response(true, 'Archivo subido correctamente', $result);
 
         } catch (Exception $e) {
-            $this->response(false, $e->getMessage());
+            $this->logError($e, "UPLOAD_ARCHIVO");
         }
     }
 
@@ -60,7 +60,7 @@ class FileController extends Controller {
             $this->response(true, 'Archivo eliminado correctamente');
 
         } catch (Exception $e) {
-            $this->response(false, $e->getMessage());
+            $this->logError($e, "DELETE_ARCHIVO");
         }
     }
 }

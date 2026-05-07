@@ -11,12 +11,12 @@ class Controller {
     }
 
     // Respuesta JSON estándar
-    protected function response($status, $msg, $data = null, $code = 200) {
+    protected function response($status, $message, $data = null, $code = 200) {
         http_response_code($code);
         header('Content-Type: application/json');
         echo json_encode([
             'status' => $status,
-            'msg'    => $msg,
+            'message'    => $message,
             'data'   => $data
         ]);exit;
     }
@@ -47,5 +47,19 @@ class Controller {
             header('Location: ' . BASE_URL . 'dashboard');
             exit;
         }
+    }
+
+    // Para registrar errores en el log y enviar una respuesta genérica al usuario, evitando mostrar detalles técnicos
+    protected function logError(Exception $e, $context = "GENERAL") {
+        error_log(" [{$context}_ERROR] " . $e->getMessage());
+
+        $mensajeUsuario = $e->getMessage();
+
+        // Filtramos SOLO si detectamos errores técnicos conocidos
+        if (strpos($mensajeUsuario, 'SQLSTATE') !== false) {
+            $mensajeUsuario = "Error de base de datos. Por favor, contacte al soporte.";
+        }
+
+        $this->response(false, $mensajeUsuario);
     }
 }

@@ -1,31 +1,41 @@
-document.getElementById('btn-logout').addEventListener('click', async () => {
+document.addEventListener('DOMContentLoaded', () => {
 
-    const result = await Swal.fire({
-        title: '¿Cerrar sesión?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Sí, salir',
-        cancelButtonText: 'Cancelar'
-    });
+    const btnLogout = document.getElementById('btn-logout');
 
-    if (!result.isConfirmed) return;
+    if (btnLogout) {
+        btnLogout.addEventListener('click', async () => {
 
-    try {
-        const response = await fetch(BASE_URL + 'auth/logout', {
-            method: 'POST'
-        });
+            const confirmation = await Swal.fire({
+                title: '¿Cerrar sesión?',
+                text: '¿Estás seguro de que deseas cerrar sesión?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, salir',
+                cancelButtonText: 'Cancelar'
+            });
 
-        const data = await response.json();
+            if (!confirmation.isConfirmed) return;
 
-        if (!data.status) throw new Error(data.msg);
+            try {
+                const response = await fetch(BASE_URL + 'auth/logout', {
+                    method: 'POST'
+                });
 
-        // Redirigir al login
-        window.location.href = BASE_URL + 'login';
+                const result = await response.json().catch(() => {
+                    throw new Error('Respuesta no válida del servidor');
+                });
 
-    } catch (err) {
-        Toast.fire({
-            icon: 'error',
-            title: 'Error al cerrar sesión'
+                if (!result.status) throw new Error(result.message);
+
+                // Redirigir al login
+                window.location.href = BASE_URL + 'login';
+
+            } catch (err) {
+                Toast.fire({
+                    icon: 'error',
+                    title: err.message || 'Error de conexión con el servidor'
+                });
+            }
         });
     }
 });

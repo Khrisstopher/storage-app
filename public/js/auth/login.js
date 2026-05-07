@@ -23,21 +23,19 @@ form.addEventListener('submit', async (e) => {
             body: JSON.stringify(formData)
         });
 
-        const responseData = await response.json();
+        const result = await response.json().catch(() => {
+            throw new Error('Respuesta no válida del servidor');
+        });
 
-        if (responseData.status) {
-            window.location.href = BASE_URL + 'dashboard';
-        } else {
-            Toast.fire({
-                icon: 'error',
-                title: responseData.msg
-            });
+        if (!result.status) {
+            throw new Error(result.message);
         }
+        window.location.href = BASE_URL + 'dashboard';
 
     } catch (err) {
         Toast.fire({
             icon: 'error',
-            title: 'Ocurrió un error al procesar tu solicitud. Por favor, inténtalo de nuevo.'
+            title: err.message || 'Error de conexión con el servidor'
         });
     }
 });

@@ -25,25 +25,19 @@ form.addEventListener('submit', async (e) => {
 
         });
 
-        const responseData = await response.json();
+        const result = await response.json().catch(() => {
+            throw new Error('Respuesta no válida del servidor');
+        });
 
-        if (responseData.status) {
-            await Toast.fire({
-                icon: 'success',
-                title: responseData.msg
-            });
-            window.location.href = BASE_URL + 'login';
-        } else {
-            Toast.fire({
-                icon: 'error',
-                title: responseData.msg
-            });
+        if (!result.status) {
+            throw new Error(result.message);
         }
+        window.location.href = BASE_URL + 'login';
 
     } catch (err) {
         Toast.fire({
             icon: 'error',
-            title: 'Ocurrió un error al procesar tu solicitud. Por favor, inténtalo de nuevo.'
+            title: err.message || 'Error de conexión con el servidor'
         });
     }
 });

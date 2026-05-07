@@ -25,7 +25,7 @@
         </div>
 
         <!-- Lista de archivos -->
-        <div id="files-container" class="files-grid d-grid gap-3"></div>
+        <div id="files-container" class="files-grid d-grid gap-3">
             <!-- JS renderiza aquí -->
         </div>
 

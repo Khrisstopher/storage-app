@@ -19,7 +19,7 @@ class AuthController extends Controller {
             $this->response(true, 'Usuario registrado correctamente', $result);
 
         } catch (Exception $e) {
-            $this->response(false, $e->getMessage());
+            $this->logError($e, "REGISTER");
         }
     }
 
@@ -39,7 +39,7 @@ class AuthController extends Controller {
             $this->response(true, 'Login exitoso', $user);
 
         } catch (Exception $e) {
-            $this->response(false, $e->getMessage());
+            $this->logError($e, "LOGIN");
         }
     }
     public function logout() {
@@ -52,7 +52,7 @@ class AuthController extends Controller {
             $this->response(true, 'Sesión cerrada correctamente');
 
         } catch (Exception $e) {
-            $this->response(false, 'Error al cerrar sesión');
+            $this->logError($e, "LOGOUT");
         }
     }
 }

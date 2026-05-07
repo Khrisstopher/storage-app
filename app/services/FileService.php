@@ -199,6 +199,7 @@ class FileService {
 
         $userExternalId = $this->getUserExternalId($userId);
 
+        $fileId = null;
         $path = null;
 
         try {
@@ -229,11 +230,10 @@ class FileService {
 
     public function delete(int $fileId, int $userId): void {
 
-        $stmt = $this->pdo->prepare("
-            SELECT file_path 
+        $stmt = $this->pdo->prepare("SELECT file_path 
             FROM files 
-            WHERE id = ? AND user_id = ?
-        ");
+            WHERE id = ? AND user_id = ?");
+
         $stmt->execute([$fileId, $userId]);
 
         $file = $stmt->fetch(PDO::FETCH_ASSOC);
