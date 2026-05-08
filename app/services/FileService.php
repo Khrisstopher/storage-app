@@ -154,9 +154,18 @@ class FileService {
     public function listByUser($userId) {
 
         try{
-            $stmt = $this->pdo->prepare("SELECT id, original_name, file_size, file_type, created_at 
-                                        FROM files WHERE user_id = ? 
-                                        ORDER BY created_at DESC");
+            $stmt = $this->pdo->prepare("SELECT 
+                    f.id,
+                    f.filename,
+                    f.original_name, 
+                    f.file_size, 
+                    f.file_type, 
+                    f.created_at, 
+                    u.external_id 
+                FROM files f
+                INNER JOIN users u ON f.user_id = u.id
+                WHERE f.user_id = ? 
+                ORDER BY f.created_at DESC");
             $stmt->execute([$userId]);
             $files = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -164,6 +173,8 @@ class FileService {
             return array_map(function ($file) {
                 return [
                     'id'   => $file['id'],
+                    'filename' => $file['filename'],
+                    'user_external_id' => $file['external_id'],
                     'name' => $file['original_name'],
                     'size' => $this->formatSize($file['file_size']),
                     'type' => $file['file_type'],
@@ -260,5 +271,14 @@ class FileService {
             $this->pdo->rollBack();
             throw new Exception('Error al eliminar el archivo');
         }
+    }
+
+    public function getFileForDownload($fileId, $userId) {
+        $stmt = $this->pdo->prepare("SELECT f.filename, f.original_name, u.external_id 
+            FROM files f
+            INNER JOIN users u ON f.user_id = u.id
+            WHERE f.id = ? AND f.user_id = ?");
+        $stmt->execute([$fileId, $userId]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 }

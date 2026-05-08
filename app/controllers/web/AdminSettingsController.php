@@ -13,10 +13,7 @@ class AdminSettingsController extends Controller {
             'title' => 'Admin Settings - Storage App',
             'styles' => 'css/admin/settings.css',
             'user_name' => $_SESSION['user_name'] ?? 'Usuario',
-            'scripts' => [
-                'js/admin/settings.js',
-                'js/auth/auth.js'
-            ]
+            'scripts' => 'js/admin/settings.js'
         ]);
     }
 }

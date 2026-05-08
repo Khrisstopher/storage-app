@@ -63,4 +63,56 @@ class FileController extends Controller {
             $this->logError($e, "DELETE_ARCHIVO");
         }
     }
+
+    public function download() {
+        try {
+            if (!isset($_SESSION['user_id'])) {
+                throw new Exception('No autorizado');
+            }
+
+            $fileId = $_GET['id'] ?? null;
+            if (!$fileId) {
+                throw new Exception('ID de archivo requerido');
+            }
+
+            $file = $this->fileService->getFileForDownload($fileId, $_SESSION['user_id']);
+
+            if (!$file) {
+                throw new Exception('Archivo no encontrado o acceso denegado');
+            }
+
+            // 3. Construir ruta absoluta (fuera de public)
+            $filePath = __DIR__ . "/../../../storage/uploads/" . $file['external_id'] . "/" . $file['filename'];
+
+            if (!file_exists($filePath)) {
+                throw new Exception('El archivo físico no existe en el servidor');
+            }
+
+            // 4. Configuración de Headers para descarga
+            header('Content-Description: File Transfer');
+            header('Content-Type: application/octet-stream'); 
+            header('Content-Disposition: attachment; filename="' . $file['original_name'] . '"');
+            header('Expires: 0');
+            header('Cache-Control: must-revalidate');
+            header('Pragma: public');
+            header('Content-Length: ' . filesize($filePath));
+            
+            // Limpiamos el buffer para asegurar que no haya basura en el archivo
+            if (ob_get_level()) {
+                ob_end_clean();
+            }
+            
+            flush();
+            
+            // Enviamos el archivo al navegador
+            if (readfile($filePath) === false) {
+                throw new Exception("Error al leer el archivo para la descarga.");
+            }
+            
+            exit;
+
+        } catch (Exception $e) {
+            $this->logError($e, "DOWNLOAD_FILE");
+        }
+    }
 }

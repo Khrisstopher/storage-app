@@ -1,7 +1,24 @@
-const form = document.getElementById('login-form');
+/**
+ * Archivo: public/js/auth/login.js
+ * Descripción: Lógica para el formulario de login de usuarios.
+ * Autor: @KhrisstopherTube
+ * Fecha: 08-05-2026
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('login-form');
+    if (form){
+        form.addEventListener('submit', handleLogin);
+    }
+});
 
-form.addEventListener('submit', async (e) => {
+/**
+ * Maneja el envío del formulario de login
+ * @param {Event} e 
+ * @returns 
+ */
+async function handleLogin(e) {
     e.preventDefault();
+    const form = e.currentTarget;
 
     if (!form.checkValidity()) {
         form.reportValidity();
@@ -38,4 +55,4 @@ form.addEventListener('submit', async (e) => {
             title: err.message || 'Error de conexión con el servidor'
         });
     }
-});
+}

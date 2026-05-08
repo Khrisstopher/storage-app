@@ -26,6 +26,7 @@ class Router {
         'files/list'    => ['api','FileController', 'list', 'GET'],
         'files/upload'  => ['api','FileController', 'upload', 'POST'],
         'files/delete'  => ['api','FileController', 'delete', 'POST'],
+        'files/download' => ['api', 'FileController', 'download', 'GET'],
 
         // Rutas para configuración de administración
         'settings/file-restrictions'      => ['api','AdminSettingsController', 'fileRestrictions', 'GET'],

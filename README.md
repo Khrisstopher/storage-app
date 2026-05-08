@@ -20,13 +20,15 @@ Actualmente el proyecto ya cuenta con:
 - Arquitectura basada en POO
 - Renderizado dinámico usando JavaScript Vanilla (Fetch API)
 - Validación de archivos ZIP
+- Panel de administración
+- Descarga de Archivos subidos
 
 Actualmente se está desarrollando:
 
-- Panel de administración
 - Restricción de extensiones peligrosas
 - Gestión de cuotas de almacenamiento
 - Sistema de grupos y roles avanzados
+- Lógica de panel de administración
 
 ---
 

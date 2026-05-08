@@ -24,7 +24,7 @@
     <?= $content ?> <!-- Aquí se inyecta la vista específica -->
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="js/config.js"></script>
+    <script src="js/main.js"></script>
 
     <?php if (!empty($scripts)): ?>
         <?php if (is_array($scripts)): ?>
