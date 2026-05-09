@@ -9,8 +9,7 @@ class FileController extends Controller {
     public function __construct($pdo) {
         $this->fileService = new FileService($pdo);
     }
-
-    //  Listar archivos del usuario
+    
     public function list() {
         try {
             $this->requireAuth();
@@ -25,7 +24,6 @@ class FileController extends Controller {
         }
     }
 
-    // Subir nuevo archivo
     public function upload() {
         try {
             $this->requireAuth();
@@ -83,6 +81,8 @@ class FileController extends Controller {
 
             // 3. Construir ruta absoluta (fuera de public)
             $filePath = __DIR__ . "/../../../storage/uploads/" . $file['external_id'] . "/" . $file['filename'];
+
+            error_log($filePath);
 
             if (!file_exists($filePath)) {
                 throw new Exception('El archivo físico no existe en el servidor');

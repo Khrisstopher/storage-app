@@ -1,4 +1,11 @@
 /**
+ * Archivo: public/js/files/dashboard.js
+ * Descripción: Lógica para la vista de gestión de archivos.
+ * Autor: @KhrisstopherTube
+ * Fecha: 08-05-2026
+ */
+
+/**
  * Crea el elemento HTML para una tarjeta de archivo
  * @param {Object} file - Objeto con id, name y size
  * @returns {HTMLElement}
@@ -78,7 +85,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
             const nuewCard = createFileCard({
                 id: result.data.id,
-                name: file.name,
+                name: result.data.name,
                 size: file.size
             });
 
