@@ -81,8 +81,6 @@ class FileController extends Controller {
             // 3. Construir ruta absoluta (fuera de public)
             $filePath = __DIR__ . "/../../../storage/uploads/" . $file['external_id'] . "/" . $file['filename'];
 
-            error_log($filePath);
-
             if (!file_exists($filePath)) {
                 throw new Exception('El archivo físico no existe en el servidor');
             }

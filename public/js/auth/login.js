@@ -2,7 +2,6 @@
  * Archivo: public/js/auth/login.js
  * Descripción: Lógica para el formulario de login de usuarios.
  * Autor: @KhrisstopherTube
- * Fecha: 08-05-2026
  */
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('login-form');
@@ -32,7 +31,7 @@ async function handleLogin(e) {
 
     try {
 
-        const response = await fetch(BASE_URL + 'auth/login', {
+        const response = await fetch(window.BASE_URL + 'auth/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -47,7 +46,7 @@ async function handleLogin(e) {
         if (!result.status) {
             throw new Error(result.message);
         }
-        window.location.href = BASE_URL + 'dashboard';
+        window.location.href = window.BASE_URL + 'dashboard';
 
     } catch (err) {
         Toast.fire({

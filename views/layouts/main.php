@@ -6,9 +6,7 @@
 
     <!-- Ruta base -->
     <base href="<?= BASE_URL ?>">
-
     <title><?= $title ?? 'Storage App' ?></title>
-
     <link rel="shortcut icon" href="img/KHRISM.ico">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -24,6 +22,7 @@
     <?= $content ?> <!-- Aquí se inyecta la vista específica -->
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script> window.BASE_URL = "<?= BASE_URL ?>"; </script>
     <script src="js/main.js"></script>
 
     <?php if (!empty($scripts)): ?>

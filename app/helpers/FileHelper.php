@@ -1,5 +1,9 @@
 <?php
-
+/**
+ * Archivo: app/helpers/FileHelper.php
+ * Descripción: Métodos globales.
+ * Autor: @KhrisstopherTube
+ */
 class FileHelper {
 
     /**

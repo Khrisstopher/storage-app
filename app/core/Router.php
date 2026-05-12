@@ -33,12 +33,12 @@ class Router {
         'settings/file-restrictions/save' => ['api','AdminSettingsController', 'saveFileRestrictions', 'POST'],
     ];
 
-    private function jsonResponse($status, $msg, $code = 200) {
+    private function jsonResponse($status, $message, $code = 200) {
         http_response_code($code);
         header('Content-Type: application/json');
         echo json_encode([
             'status' => $status,
-            'msg' => $msg
+            'message' => $message
         ]);
         exit;
     }
@@ -72,8 +72,11 @@ class Router {
             $this->jsonResponse(false, 'Método no implementado', 500);
         }
 
-        $database = new Database();
-        $pdo = $database->getConnection();
+        $pdo = null;
+        if($controllerName !== 'PageController'){
+            $database = new Database();
+            $pdo = $database->getConnection();
+        }
 
         // Instancia el controlador pasándole la conexión PDO
         $controller = new $controllerName($pdo);

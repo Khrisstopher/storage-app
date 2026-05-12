@@ -1,7 +1,11 @@
 <?php
-// Métodos para actualizar las restricciones de archivos y el límite global.
+/**
+ * Archivo: app/services/AdminSettingService.php
+ * Descripción: Clase para poner restricciones a usuarios no admins.
+ * Autor: @KhrisstopherTube
+ */
 
-class AdminSettingsService {
+class AdminSettingService {
     private PDO $pdo;
 
     public function __construct(PDO $pdo) {
@@ -98,8 +102,5 @@ class AdminSettingsService {
 
             throw $e;
         }
-    }
-
-    public function updateGlobalQuota($data) {
     }
 }

@@ -33,7 +33,7 @@ async function handleRegister(e) {
     };
 
     try {
-        const response = await fetch(BASE_URL + 'auth/register', {
+        const response = await fetch(window.BASE_URL + 'auth/register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -49,7 +49,7 @@ async function handleRegister(e) {
             throw new Error(result.message);
         }
 
-        window.location.href = BASE_URL + 'login';
+        window.location.href = window.BASE_URL + 'login';
 
     } catch (err) {
         Toast.fire({

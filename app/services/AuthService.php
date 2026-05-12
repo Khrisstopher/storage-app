@@ -1,15 +1,21 @@
 <?php
-
+/**
+ * Archivo: app/services/AuthService.php
+ * Descripción: Clase para autenticación.
+ * Autor: @KhrisstopherTube
+ */
 require_once __DIR__ . '/../models/AuthModel.php';
 
 class AuthService {
     private PDO $pdo;
     private AuthModel $authModel;
 
-
     public function __construct(PDO $pdo) {
         $this->pdo = $pdo;
         $this->authModel = new AuthModel($pdo);
+    }
+    private function validateEmail($email){
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) throw new Exception('Correo inválido');
     }
 
     public function register($data) {
@@ -19,7 +25,7 @@ class AuthService {
 
         if (!$name || !$email || !$password) throw new Exception('Datos incompletos');
         if (strlen($name) < 3) throw new Exception('El nombre es muy corto');
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) throw new Exception('Correo inválido');
+        $this->validateEmail($email);
         if (strlen($password) < 8) throw new Exception('La contraseña debe tener al menos 8 caracteres');
 
         if ($this->authModel->emailExists($email)) {
@@ -48,7 +54,7 @@ class AuthService {
         $password = $data['password'] ?? '';
 
         if (!$email || !$password) throw new Exception('Datos incompletos');
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) throw new Exception('Correo inválido');
+        $this->validateEmail($email);
 
         try {
             $user = $this->authModel->getUserByEmail($email);

@@ -1,5 +1,9 @@
 <?php
-
+/**
+ * Archivo: app/services/handlers/StorageHandler.php
+ * Descripción: Clase encargada de guardar el archivo en el directorio.
+ * Autor: @KhrisstopherTube
+ */
 class StorageHandler {
     private string $basePath;
 
@@ -14,7 +18,7 @@ class StorageHandler {
 
     public function store(string $tmpPath, string $userExtId, string $newName): string {
         $dir = $this->basePath . $userExtId . '/';
-        if (!is_dir($dir)) mkdir($dir, 0777, true);
+        if (!is_dir($dir)) mkdir($dir, 0755, true);
         
         $destination = $dir . $newName;
         if (!move_uploaded_file($tmpPath, $destination)) {

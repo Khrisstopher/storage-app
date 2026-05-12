@@ -35,7 +35,7 @@ class FileModel {
         $stmt = $this->pdo->prepare("SELECT external_id FROM users WHERE id = ?");
         $stmt->execute([$userId]);
         $externalId = $stmt->fetchColumn();
-        return $externalId ?: null;
+        return $externalId ?: '';
     }
 
     public function findAllByUserId(int $userId): array {

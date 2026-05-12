@@ -19,10 +19,6 @@ const Toast = Swal.mixin({
     }
 });
 
-// URL base de la aplicación (ajusta según tu configuración)
-const BASE_URL = '/storage-app/public/';
-
-
 // Para mostrar los iconos de los archivos según su extensión
 function getFileIcon(extension) {
 
@@ -84,7 +80,7 @@ async function handleLogout(e) {
     if (!confirmation.isConfirmed) return;
 
     try {
-        const response = await fetch(BASE_URL + 'auth/logout', {
+        const response = await fetch(window.BASE_URL + 'auth/logout', {
             method: 'POST'
         });
 
@@ -95,7 +91,7 @@ async function handleLogout(e) {
         if (!result.status) throw new Error(result.message);
 
         // Redirigir al login
-        window.location.href = BASE_URL + 'login';
+        window.location.href = window.BASE_URL + 'login';
 
     } catch (err) {
         Toast.fire({

@@ -1,14 +1,14 @@
 <?php
 
 require_once __DIR__ . '/../../core/Controller.php';
-require_once __DIR__ . '/../../services/AdminSettingsService.php';
+require_once __DIR__ . '/../../services/AdminSettingService.php';
 
 class AdminSettingsController extends Controller {
 
-    private AdminSettingsService $settingsService;
+    private AdminSettingService $settingsService;
 
     public function __construct($pdo) {
-        $this->settingsService = new AdminSettingsService($pdo);
+        $this->settingsService = new AdminSettingService($pdo);
     }
 
     public function fileRestrictions() {

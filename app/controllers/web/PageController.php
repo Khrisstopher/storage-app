@@ -3,6 +3,11 @@
 require_once __DIR__ . '/../../core/Controller.php';
 
 class PageController extends Controller {
+    private ?PDO $pdo;
+
+    public function __construct($pdo = null) {
+        $this->pdo = $pdo;
+    }
 
     // Página de entrada
     public function home() {

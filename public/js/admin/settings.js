@@ -2,7 +2,6 @@
  * Archivo: public/js/admin/settings.js
  * Descripción: Lógica para administración de restricciones y configuraciones.
  * Autor: @KhrisstopherTube
- * Fecha: 08-05-2026
  */
 document.addEventListener('DOMContentLoaded', async () => {
     const fileRestrictionsForm = document.getElementById('fileRestrictionsForm');
@@ -27,7 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
  */
 async function loadFileRestrictions(inputElement) {
     try {
-        const response = await fetch(BASE_URL + 'settings/file-restrictions');
+        const response = await fetch(window.BASE_URL + 'settings/file-restrictions');
 
         const result = await response.json().catch(() => {
             throw new Error('Respuesta no válida del servidor');
@@ -58,8 +57,7 @@ async function saveFileRestrictions(e) {
 
     try {
 
-        const response = await fetch(
-            BASE_URL + 'settings/file-restrictions/save',
+        const response = await fetch(window.BASE_URL + 'settings/file-restrictions/save',
             {
                 method: 'POST',
                 headers: {

@@ -1,5 +1,9 @@
 <?php
-
+/**
+ * Archivo: app/services/FileService.php
+ * Descripción: Clase con métodos para subir, listar, borrar y descargar archivos.
+ * Autor: @KhrisstopherTube
+ */
 require_once __DIR__ . '/../models/FileModel.php';
 require_once __DIR__ . '/handlers/StorageHandler.php';
 require_once __DIR__ . '/../helpers/FileHelper.php';
