@@ -6,6 +6,17 @@ class Controller {
 
     // Renderizar vista con datos
     protected function view($view, $data = []) { 
+
+        // Datos globales
+        $globalData = [
+            'user_name' => $_SESSION['user_name'] ?? null,
+            'role_id'   => $_SESSION['role_id'] ?? null,
+            'user_id'   => $_SESSION['user_id'] ?? null,
+        ];
+
+        // Guardarlos en $data
+        $data = array_merge($globalData, $data);
+
         // Acá puedo añadir datos comunes a todas las vistas, como el usuario logueado, etc.
         View::render($view, $data);
     }
@@ -37,6 +48,15 @@ class Controller {
     protected function requireAuth() {
         if (!isset($_SESSION['user_id'])) {
             header('Location: ' . BASE_URL . 'login');
+            exit;
+        }
+    }
+
+    // Redirige a dashboard si no es admin y la vista lo requiere
+    protected function requireAdmin() {
+        $this->requireAuth();
+        if (!isset($_SESSION['role_id']) || (int)$_SESSION['role_id'] !== 1) {
+            header('Location: ' . BASE_URL . 'dashboard');
             exit;
         }
     }

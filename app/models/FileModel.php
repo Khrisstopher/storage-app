@@ -1,6 +1,13 @@
 <?php
-
-class FileRepository {
+/**
+ * FileModel
+ * 
+ * Modelo que gestiona todas las operaciones de base de datos relacionadas con archivos.
+ * Incluye métodos para crear, consultar, eliminar archivos y gestionar restricciones de extensiones.
+ * 
+ * @package app\models
+ */
+class FileModel {
     private PDO $pdo;
 
     public function __construct(PDO $pdo) {
@@ -31,9 +38,6 @@ class FileRepository {
         return $externalId ?: null;
     }
 
-    /**
-     * Obtiene los archivos de un usuario con los datos crudos de la BD
-     */
     public function findAllByUserId(int $userId): array {
         $sql = "SELECT 
                     f.id,
@@ -74,9 +78,6 @@ class FileRepository {
         return (int) $stmt->fetchColumn();
     }
 
-    /**
-     * Obtiene los detalles necesarios para localizar y nombrar el archivo en la descarga
-     */
     public function getDownloadDetails(int $fileId, int $userId): ?array {
         $sql = "SELECT f.filename, f.original_name, u.external_id 
                 FROM files f

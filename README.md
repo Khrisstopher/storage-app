@@ -74,7 +74,7 @@ El proyecto fue desarrollado siguiendo una arquitectura MVC personalizada y util
 - Sistema de rutas personalizado
 - Controladores separados para vistas y API
 - Respuestas JSON para peticiones asíncronas
-- Validación de archivos con extenciones prohibidas en archivos zip
+- Validación de archivos con extensiones prohibidas en archivos zip
 
 ---
 

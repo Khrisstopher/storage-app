@@ -13,7 +13,7 @@ class AdminSettingsController extends Controller {
 
     public function fileRestrictions() {
         try {
-            $this->requireAuth();
+            $this->requireAdmin();
             $restrictions = $this->settingsService->getFileRestrictions();
             $this->response(true, 'Restricciones de archivos obtenidas', $restrictions);
         } catch (Exception $e) {
@@ -24,7 +24,7 @@ class AdminSettingsController extends Controller {
     public function saveFileRestrictions() {
         try {
 
-            $this->requireAuth();
+            $this->requireAdmin();
 
             $data = $this->getRequestData();
 
@@ -51,7 +51,7 @@ class AdminSettingsController extends Controller {
 
     public function updateGlobalQuota() {
         try {
-            $this->requireAuth();
+            $this->requireAdmin();
             $data = $this->getRequestData();
 
             $result = $this->settingsService->updateGlobalQuota($data);

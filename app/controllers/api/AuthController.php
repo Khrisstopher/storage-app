@@ -42,15 +42,23 @@ class AuthController extends Controller {
             $this->logError($e, "LOGIN");
         }
     }
+    
     public function logout() {
         try {
-            // Limpiar variables de sesión
             $_SESSION = [];
+
+            // Si se desea destruir la cookie de sesión por completo
+            if (ini_get("session.use_cookies")) {
+                $params = session_get_cookie_params();
+                setcookie(session_name(), '', time() - 42000,
+                    $params["path"], $params["domain"],
+                    $params["secure"], $params["httponly"]
+                );
+            }
 
             session_destroy();
 
             $this->response(true, 'Sesión cerrada correctamente');
-
         } catch (Exception $e) {
             $this->logError($e, "LOGOUT");
         }

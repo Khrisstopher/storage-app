@@ -5,6 +5,11 @@ class StorageHandler {
 
     public function __construct() {
         $this->basePath = ROOT_PATH . '/storage/uploads/';
+
+        // Asegurar que la carpeta principal de uploads existe
+        if (!is_dir($this->basePath)) {
+            mkdir($this->basePath, 0777, true);
+        }
     }
 
     public function store(string $tmpPath, string $userExtId, string $newName): string {

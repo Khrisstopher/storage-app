@@ -11,7 +11,6 @@ class DashboardController extends Controller {
         $this->view('dashboard', [
             'title' => 'Dashboard - Storage App',
             'styles' => 'css/files/dashboard.css',
-            'user_name' => $_SESSION['user_name'] ?? 'Usuario',
             'scripts' => 'js/files/dashboard.js'
         ]);
     }

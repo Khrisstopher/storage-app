@@ -1,30 +1,20 @@
-# =========================
 # Uploads de usuarios
-# =========================
 storage/uploads/*
 
 # Mantener estructura de carpetas
 !storage/uploads/.gitkeep
 
-# =========================
 # Archivos temporales / logs
-# =========================
 *.log
 tmp/
 cache/
 
-# =========================
 # Archivos del sistema
-# =========================
 .DS_Store
 Thumbs.db
 
-# =========================
 # Configuración del editor
-# =========================
 .vscode/
 
-# =========================
 # Archivos de postman
-# =========================
 .postman/

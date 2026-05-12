@@ -64,9 +64,8 @@ class FileController extends Controller {
 
     public function download() {
         try {
-            if (!isset($_SESSION['user_id'])) {
-                throw new Exception('No autorizado');
-            }
+
+            $this->requireAuth();
 
             $fileId = $_GET['id'] ?? null;
             if (!$fileId) {

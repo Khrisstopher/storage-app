@@ -1,42 +1,18 @@
 <?php
 
-// En FileService.php
-require_once __DIR__ . '/../models/FileRepository.php';
+require_once __DIR__ . '/../models/FileModel.php';
 require_once __DIR__ . '/handlers/StorageHandler.php';
+require_once __DIR__ . '/../helpers/FileHelper.php';
 
 class FileService {
     private PDO $pdo;
-    private FileRepository $repo;
+    private FileModel $fileModel;
     private StorageHandler $storage;
 
     public function __construct(PDO $pdo) {
         $this->pdo = $pdo;
-        $this->repo = new FileRepository($pdo);
+        $this->fileModel = new FileModel($pdo);
         $this->storage = new StorageHandler();
-    }
-
-    // Funciones helper
-    private function generateFileName(string $extension): string {
-        return uniqid('', true) . '.' . $extension;
-    }
-    private function validateExtension(string $extension, array $blocked): void {
-        if (in_array($extension, $blocked)) {
-            throw new Exception("El tipo de archivo .$extension no está permitido");
-        }
-    }
-    private function getExtension(string $filename): string {
-        return strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-    }
-    private function formatSize($bytes) {
-
-        if ($bytes >= 1048576) {
-            return round($bytes / 1048576, 2) . ' MB';
-        }
-        if ($bytes >= 1024) {
-            return round($bytes / 1024, 2) . ' KB';
-        }
-
-        return $bytes . ' B';
     }
 
     private function resolveOriginalName(string $originalName, int $userId): string {
@@ -48,7 +24,7 @@ class FileService {
         $counter = 1;
 
         // Bucle: Mientras el nombre exista en la tabla para ese user_id, incrementamos
-        while ($this->repo->originalNameExists($finalName, $userId)) {
+        while ($this->fileModel->originalNameExists($finalName, $userId)) {
             $finalName = $basename . " ($counter)" . $extension;
             $counter++;
         }
@@ -57,7 +33,7 @@ class FileService {
     }
 
     private function validateQuota(int $userId, int $fileSize): void {
-        $used = $this->repo->getTotalSizeByUser($userId);
+        $used = $this->fileModel->getTotalSizeByUser($userId);
         
         // Definimos la regla de negocio (Límite de 10MB)
         $limit = 10 * 1024 * 1024; 
@@ -106,23 +82,25 @@ class FileService {
         $tmpPath = $file['tmp_name'];
         $size = $file['size'];
 
-        $extension = $this->getExtension($originalName);
+        $extension = FileHelper::getExtension($originalName);
 
-        $blocked = $this->repo->getBlockedExtensions();
+        $blocked = $this->fileModel->getBlockedExtensions();
 
-        $this->validateExtension($extension, $blocked);
+        if (in_array($extension, $blocked)) {
+            throw new Exception("El tipo de archivo .$extension no está permitido");
+        }
 
         if ($extension === 'zip') {
-            $this->repo->validateZip($tmpPath, $blocked);
+            $this->validateZip($tmpPath, $blocked);
         }
 
         $this->validateQuota($userId, $size);
 
         $originalName = $this->resolveOriginalName($originalName, $userId);
 
-        $newName = $this->generateFileName($extension);
+        $newName = FileHelper::generateUniqueName($extension);
 
-        $userExternalId = $this->repo->getUserExternalId($userId);
+        $userExternalId = $this->fileModel->getUserExternalId($userId);
 
         $fileId = null;
         $path = null;
@@ -138,7 +116,7 @@ class FileService {
                 'file_size'     => $size,
                 'file_type'     => $extension
             ];
-            $fileId = $this->repo->save($fileData);
+            $fileId = $this->fileModel->save($fileData);
 
         } catch (Exception $e) {
             if ($path && file_exists($path)) {
@@ -160,7 +138,7 @@ class FileService {
         }
 
         try {
-            $files = $this->repo->findAllByUserId($userId);
+            $files = $this->fileModel->findAllByUserId($userId);
 
             return array_map(function ($file) {
                 return [
@@ -168,7 +146,7 @@ class FileService {
                     'filename'         => $file['filename'],
                     'user_external_id' => $file['external_id'],
                     'name'             => $file['original_name'],
-                    'size'             => $this->formatSize($file['file_size']),
+                    'size'             => FileHelper::formatSize($file['file_size']),
                     'type'             => $file['file_type'],
                     'date'             => $file['created_at']
                 ];
@@ -180,7 +158,7 @@ class FileService {
     }
 
     public function delete(int $fileId, int $userId): void {
-        $file = $this->repo->findByIdAndUser($fileId, $userId);
+        $file = $this->fileModel->findByIdAndUser($fileId, $userId);
 
         if (!$file) {
             throw new Exception('Archivo no encontrado o no autorizado');
@@ -189,7 +167,7 @@ class FileService {
         $this->pdo->beginTransaction();
 
         try {
-            $this->repo->delete($fileId);
+            $this->fileModel->delete($fileId);
 
             // Eliminar del filesystem usando el StorageHandler
             if (file_exists($file['file_path'])) {
@@ -205,7 +183,7 @@ class FileService {
     }
 
     public function getFileForDownload(int $fileId, int $userId): array {
-        $file = $this->repo->getDownloadDetails($fileId, $userId);
+        $file = $this->fileModel->getDownloadDetails($fileId, $userId);
 
         if (!$file) {
             throw new Exception('El archivo solicitado no existe o no tienes permiso para acceder a él.');
