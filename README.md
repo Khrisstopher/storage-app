@@ -247,12 +247,12 @@ El router diferencia dos tipos de rutas:
    ```
    Luego ejecutar el script `sql/consultas.sql`.
 
-3. Configurar la conexión a la base de datos en `config/db_connection.php`:
+3. Configurar la conexión a la base de datos en `config/app.php`:
    ```php
-   private string $host     = "localhost";
-   private string $dbName   = "storage_app";
-   private string $username = "root";
-   private string $password = "";
+   define('DB_HOST', 'localhost');
+   define('DB_NAME', 'storage_app');
+   define('DB_USER', 'root');
+   define('DB_PASS', '');
    ```
 
 4. Verificar que `BASE_URL` en `config/app.php` coincide con tu entorno:
@@ -333,6 +333,6 @@ Panel del usuario para visualizar y gestionar sus archivos.
 ---
 
 ### ⚙️ Panel de administración
-Configuración de extensiones de archivo restringidas.
+Configuración de extensiones de archivo restringidas. (en desarrollo)
 
 ![Admin Settings](docs/screenshots/adminSettings.png)
