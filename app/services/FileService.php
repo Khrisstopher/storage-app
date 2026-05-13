@@ -1,19 +1,26 @@
 <?php
-/**
- * Archivo: app/services/FileService.php
- * Descripción: Clase con métodos para subir, listar, borrar y descargar archivos.
- * Autor: @KhrisstopherTube
- */
+
+namespace App\Services;
+
+use App\Models\FileModel;
+use App\Services\Handlers\StorageHandler;
+use App\Helpers\FileHelper;
+
 require_once __DIR__ . '/../models/FileModel.php';
 require_once __DIR__ . '/handlers/StorageHandler.php';
 require_once __DIR__ . '/../helpers/FileHelper.php';
 
+/**
+ * Servicio de gestión de archivos.
+ * @author Khrisstopher
+ * @link https://www.linkedin.com/in/khrisstopher/
+ */
 class FileService {
-    private PDO $pdo;
+    private \PDO $pdo;
     private FileModel $fileModel;
     private StorageHandler $storage;
 
-    public function __construct(PDO $pdo) {
+    public function __construct(\PDO $pdo) {
         $this->pdo = $pdo;
         $this->fileModel = new FileModel($pdo);
         $this->storage = new StorageHandler();
@@ -46,20 +53,20 @@ class FileService {
             $available = ($limit - $used) / (1024 * 1024);
             $availableFormatted = number_format($available, 2);
             
-            throw new Exception("Cuota excedida. Solo te quedan {$availableFormatted} MB disponibles.");
+            throw new \Exception("Cuota excedida. Solo te quedan {$availableFormatted} MB disponibles.");
         }
     }
     
     private function validateZip(string $tmpPath, array $blockedExtensions): void {
 
-        if (!class_exists('ZipArchive')) {
-            throw new Exception('El servidor no tiene habilitada la función para revisar archivos ZIP.');
+        if (!class_exists('\ZipArchive')) {
+            throw new \Exception('El servidor no tiene habilitada la función para revisar archivos ZIP.');
         }
 
-        $zip = new ZipArchive();
+        $zip = new \ZipArchive();
 
         if ($zip->open($tmpPath) !== TRUE) {
-            throw new Exception('No se pudo analizar el archivo ZIP');
+            throw new \Exception('No se pudo analizar el archivo ZIP');
         }
 
         for ($i = 0; $i < $zip->numFiles; $i++) {
@@ -68,18 +75,18 @@ class FileService {
 
             if (in_array($extInside, $blockedExtensions)) {
                 $zip->close();
-                throw new Exception("El archivo '$fileInside' dentro del ZIP no está permitido");
+                throw new \Exception("El archivo '$fileInside' dentro del ZIP no está permitido");
             }
         }
 
         $zip->close();
     }
 
-    // Lógica del servicio
+    // Esto debería de usar transacción
     public function upload(array $file, int $userId): array {
 
         if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
-            throw new Exception('Archivo con error o no recibido');
+            throw new \Exception('Archivo con error o no recibido');
         }
 
         $originalName = $file['name'];
@@ -91,7 +98,7 @@ class FileService {
         $blocked = $this->fileModel->getBlockedExtensions();
 
         if (in_array($extension, $blocked)) {
-            throw new Exception("El tipo de archivo .$extension no está permitido");
+            throw new \Exception("El tipo de archivo .$extension no está permitido");
         }
 
         if ($extension === 'zip') {
@@ -122,7 +129,7 @@ class FileService {
             ];
             $fileId = $this->fileModel->save($fileData);
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             if ($path && file_exists($path)) {
                 unlink($path);
             }
@@ -138,7 +145,7 @@ class FileService {
 
     public function listByUser(?int $userId): array {
         if (!$userId) {
-            throw new Exception('El id de usuario es obligatorio.');
+            throw new \Exception('El id de usuario es obligatorio.');
         }
 
         try {
@@ -156,8 +163,8 @@ class FileService {
                 ];
             }, $files);
 
-        } catch (Exception $e) {
-            throw new Exception("No pudimos cargar tu lista de archivos en este momento.");
+        } catch (\Exception $e) {
+            throw new \Exception("No pudimos cargar tu lista de archivos en este momento.");
         }
     }
 
@@ -165,7 +172,7 @@ class FileService {
         $file = $this->fileModel->findByIdAndUser($fileId, $userId);
 
         if (!$file) {
-            throw new Exception('Archivo no encontrado o no autorizado');
+            throw new \Exception('Archivo no encontrado o no autorizado');
         }
 
         $this->pdo->beginTransaction();
@@ -180,9 +187,9 @@ class FileService {
 
             $this->pdo->commit();
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->pdo->rollBack();
-            throw new Exception('Error al eliminar el archivo');
+            throw new \Exception('Error al eliminar el archivo');
         }
     }
 
@@ -190,7 +197,7 @@ class FileService {
         $file = $this->fileModel->getDownloadDetails($fileId, $userId);
 
         if (!$file) {
-            throw new Exception('El archivo solicitado no existe o no tienes permiso para acceder a él.');
+            throw new \Exception('El archivo solicitado no existe o no tienes permiso para acceder a él.');
         }
 
         return $file;

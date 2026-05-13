@@ -1,9 +1,18 @@
 <?php
+namespace App\Controllers\Api;
+
+use App\Core\Controller;
+use App\Services\AdminSettingService;
 
 require_once __DIR__ . '/../../core/Controller.php';
 require_once __DIR__ . '/../../services/AdminSettingService.php';
 
-class AdminSettingsController extends Controller {
+/**
+ * Controlador de administrador de restricciones y permisos.
+ * @author Khrisstopher
+ * @link https://www.linkedin.com/in/khrisstopher/
+ */
+class AdminSettingController extends Controller {
 
     private AdminSettingService $settingsService;
 

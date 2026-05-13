@@ -1,7 +1,7 @@
 /**
- * Archivo: public/js/admin/settings.js
- * Descripción: Lógica para administración de restricciones y configuraciones.
- * Autor: @KhrisstopherTube
+ * Lógica para administración de restricciones y configuraciones.
+ * @author Khrisstopher
+ * @link https://www.linkedin.com/in/khrisstopher/
  */
 document.addEventListener('DOMContentLoaded', async () => {
     const fileRestrictionsForm = document.getElementById('fileRestrictionsForm');
@@ -81,6 +81,7 @@ async function saveFileRestrictions(e) {
             icon: 'success',
             title: result.message
         });
+        // Acá hace falta mostrar la nueva extención en el input sin recargar
 
     } catch (err) {
         Toast.fire({

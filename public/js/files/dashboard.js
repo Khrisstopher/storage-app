@@ -1,8 +1,7 @@
 /**
- * Archivo: public/js/files/dashboard.js
- * Descripción: Lógica para la vista de gestión de archivos.
- * Autor: @KhrisstopherTube
- * Fecha: 08-05-2026
+ * Lógica para la vista de gestión de archivos.
+ * @author Khrisstopher
+ * @link https://www.linkedin.com/in/khrisstopher/
  */
 let container, emptyState, fileInput;
 

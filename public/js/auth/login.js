@@ -1,7 +1,7 @@
 /**
- * Archivo: public/js/auth/login.js
- * Descripción: Lógica para el formulario de login de usuarios.
- * Autor: @KhrisstopherTube
+ * Lógica para el formulario de login de usuarios.
+ * @author Khrisstopher
+ * @link https://www.linkedin.com/in/khrisstopher/
  */
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('login-form');

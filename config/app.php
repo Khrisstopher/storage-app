@@ -1,4 +1,9 @@
 <?php
+/**
+ * Archivo global de configuraciones.
+ * @author Khrisstopher
+ * @link https://www.linkedin.com/in/khrisstopher/
+ */
 
 define('BASE_URL', '/storage-app/public/');
 

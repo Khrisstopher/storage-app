@@ -1,8 +1,7 @@
 /**
- * Archivo: public/js/main.js
- * Descripción: Configuración global para la aplicación.
- * Autor: @KhrisstopherTube
- * Fecha: 08-05-2026
+ * Configuración global JS para la aplicación.
+ * @author Khrisstopher
+ * @link https://www.linkedin.com/in/khrisstopher/
  */
 
 // Configuración de SweetAlert2 para notificaciones tipo toast

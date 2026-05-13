@@ -1,4 +1,6 @@
 <?php
+
+namespace App\Core;
 // Archivo central para renderizar vistas.
 class View {
 

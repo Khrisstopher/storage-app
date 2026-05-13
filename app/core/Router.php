@@ -1,36 +1,51 @@
 <?php
 
-require_once __DIR__ . '/../../config/db_connection.php';
+namespace App\Core;
 
+use App\Config\DataBase;
+
+require_once __DIR__ . '/../../config/db_connection.php';
+require_once __DIR__ . '/Session.php';
+
+/**
+ * Descripción: Controlador de rutas
+ * 
+ * @author @KhrisstopherTube
+ * @link https://www.linkedin.com/in/khrisstopher/
+ */
 class Router {
 
     private $routes = [
         // [Carpeta, Controlador, Método, Verbo]
 
         // Rutas para vistas (web)
-        ''                  => ['web','PageController', 'home', 'GET'],
-        'home'              => ['web','PageController', 'home', 'GET'],
-        'login'             => ['web','PageController', 'login', 'GET'],
-        'register'          => ['web','PageController', 'register', 'GET'],
-        'dashboard'         => ['web','DashboardController', 'dashboard', 'GET'],
-        'admin/settings'    => ['web','AdminSettingsController', 'index', 'GET'],
+        ''                  => ['web','App\Controllers\Web\PageController', 'home', 'GET'],
+        'home'              => ['web','App\Controllers\Web\PageController', 'home', 'GET'],
+        'login'             => ['web','App\Controllers\Web\PageController', 'login', 'GET'],
+        'register'          => ['web','App\Controllers\Web\PageController', 'register', 'GET'],
+        'dashboard'         => ['web','App\Controllers\Web\DashboardController', 'dashboard', 'GET'],
+        'admin/settings'    => ['web','App\Controllers\Web\AdminSettingController', 'index', 'GET'],
 
         // Rutas para lógica de negocio (API)
 
         // Rutas para autenticación
-        'auth/register' => ['api','AuthController', 'register', 'POST'],
-        'auth/login'    => ['api','AuthController', 'login', 'POST'],
-        'auth/logout'   => ['api','AuthController', 'logout', 'POST'],
+        'auth/register' => ['api','App\Controllers\Api\AuthController', 'register', 'POST'],
+        'auth/login'    => ['api','App\Controllers\Api\AuthController', 'login', 'POST'],
+        'auth/logout'   => ['api','App\Controllers\Api\AuthController', 'logout', 'POST'],
 
         // Rutas para gestión de archivos
-        'files/list'    => ['api','FileController', 'list', 'GET'],
-        'files/upload'  => ['api','FileController', 'upload', 'POST'],
-        'files/delete'  => ['api','FileController', 'delete', 'POST'],
-        'files/download' => ['api', 'FileController', 'download', 'GET'],
+        'files/list'    => ['api','App\Controllers\Api\FileController', 'list', 'GET'],
+        'files/upload'  => ['api','App\Controllers\Api\FileController', 'upload', 'POST'],
+        'files/delete'  => ['api','App\Controllers\Api\FileController', 'delete', 'POST'],
+        'files/download' => ['api', 'App\Controllers\Api\FileController', 'download', 'GET'],
 
         // Rutas para configuración de administración
-        'settings/file-restrictions'      => ['api','AdminSettingsController', 'fileRestrictions', 'GET'],
-        'settings/file-restrictions/save' => ['api','AdminSettingsController', 'saveFileRestrictions', 'POST'],
+        'settings/file-restrictions' => [
+            'api','App\Controllers\Api\AdminSettingController', 'fileRestrictions', 'GET'
+        ],
+        'settings/file-restrictions/save' => [
+            'api','App\Controllers\Api\AdminSettingController', 'saveFileRestrictions', 'POST'
+        ],
     ];
 
     private function jsonResponse($status, $message, $code = 200) {
@@ -45,9 +60,7 @@ class Router {
 
     public function dispatch() {
 
-        // Inicializo la sesión en el punto de entrada de la aplicación 
-        // para garantizar disponibilidad global y evitar duplicación en los controladores.
-        session_start();
+        Session::init();
 
         $url = trim($_GET['url'] ?? '', '/');
 
@@ -61,19 +74,30 @@ class Router {
         if ($_SERVER['REQUEST_METHOD'] !== $httpMethod) {
             $this->jsonResponse(false, 'Método no permitido', 405);
         }
+
+        // Extraemos el final de la ruta
+        $parts = explode('\\', $controllerName);
+        $fileName = end($parts);
+
+        // Ahora cargamos el archivo usando el nombre corto ($fileName)
+        $fileContent = __DIR__ . "/../controllers/$folder/$fileName.php";
+
+        if (!file_exists($fileContent)) {
+            $this->jsonResponse(false, "Archivo del controlador no encontrado", 500);
+        }
         
-        require_once __DIR__ . "/../controllers/$folder/$controllerName.php";
+        require_once $fileContent;
 
         // Verifica que la clase del controlador exista y que el método esté implementado
         if (!class_exists($controllerName)) {
-            $this->jsonResponse(false, 'Controlador no encontrado', 500);
+            $this->jsonResponse(false, 'Controlador no encontrado' . $controllerName, 500);
         }
         if (!method_exists($controllerName, $method)) {
             $this->jsonResponse(false, 'Método no implementado', 500);
         }
 
         $pdo = null;
-        if($controllerName !== 'PageController'){
+        if($controllerName !== 'App\Controllers\Web\PageController'){
             $database = new Database();
             $pdo = $database->getConnection();
         }

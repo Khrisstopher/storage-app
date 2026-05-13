@@ -1,12 +1,21 @@
 <?php
+
+namespace App\Services\Handlers;
+
 /**
- * Archivo: app/services/handlers/StorageHandler.php
- * Descripción: Clase encargada de guardar el archivo en el directorio.
- * Autor: @KhrisstopherTube
+ * Servicio de guardado de archivo en directorio local.
+ * @author Khrisstopher
+ * @link https://www.linkedin.com/in/khrisstopher/
  */
 class StorageHandler {
     private string $basePath;
 
+
+    /**
+     * Define la ruta base de almacenamiento y asegura la existencia del directorio.
+     * * Configura el path principal utilizando la constante ROOT_PATH y crea
+     * la estructura de carpetas necesaria con permisos de escritura.
+     */
     public function __construct() {
         $this->basePath = ROOT_PATH . '/storage/uploads/';
 
@@ -16,17 +25,27 @@ class StorageHandler {
         }
     }
 
+    /**
+     * Guardar el archivo en la ruta especificada.
+     * @return string
+     * @throws \Exception
+     */
     public function store(string $tmpPath, string $userExtId, string $newName): string {
         $dir = $this->basePath . $userExtId . '/';
         if (!is_dir($dir)) mkdir($dir, 0755, true);
         
         $destination = $dir . $newName;
         if (!move_uploaded_file($tmpPath, $destination)) {
-            throw new Exception('Error físico al guardar el archivo');
+            throw new \Exception('Error físico al guardar el archivo');
         }
         return $destination;
     }
 
+    /**
+     * Elimina un archivo físico del servidor si existe.
+     * * @param string $path Ruta absoluta o relativa del archivo.
+     * @return void
+     */
     public function remove(string $path): void {
         if (file_exists($path)) unlink($path);
     }

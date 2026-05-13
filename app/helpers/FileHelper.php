@@ -1,8 +1,11 @@
 <?php
+
+namespace App\Helpers;
+
 /**
- * Archivo: app/helpers/FileHelper.php
- * Descripción: Métodos globales.
- * Autor: @KhrisstopherTube
+ * Métodos static de ayuda.
+ * @author Khrisstopher
+ * @link https://www.linkedin.com/in/khrisstopher/
  */
 class FileHelper {
 

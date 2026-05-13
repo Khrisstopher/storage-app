@@ -1,8 +1,20 @@
 <?php
 
+namespace App\Controllers\Api;
+
+use App\Core\Controller;
+use App\Services\FileService;
+use App\Core\Session;
+
 require_once __DIR__ . '/../../core/Controller.php';
 require_once __DIR__ . '/../../services/FileService.php';
+require_once __DIR__ . '/../../core/Session.php';
 
+/**
+ * Controlador de administrador de archivos.
+ * @author Khrisstopher
+ * @link https://www.linkedin.com/in/khrisstopher/
+ */
 class FileController extends Controller {
     private FileService $fileService;
 
@@ -14,12 +26,12 @@ class FileController extends Controller {
         try {
             $this->requireAuth();
 
-            $userId = $_SESSION['user_id'];
+            $userId = Session::userId();
 
             $files = $this->fileService->listByUser($userId);
 
             $this->response(true, 'Archivos consultados con exito.', $files);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->logError($e, "LIST_ARCHIVOS");
         }
     }
@@ -29,16 +41,16 @@ class FileController extends Controller {
             $this->requireAuth();
 
             if (!isset($_FILES['file'])) {
-                throw new Exception('No se recibió ningún archivo');
+                throw new \Exception('No se recibió ningún archivo');
             }
 
-            $userId = $_SESSION['user_id'];
+            $userId = Session::userId();
 
             $result = $this->fileService->upload($_FILES['file'], $userId);
 
             $this->response(true, 'Archivo subido correctamente', $result);
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->logError($e, "UPLOAD_ARCHIVO");
         }
     }
@@ -48,16 +60,16 @@ class FileController extends Controller {
             $this->requireAuth();
 
             if (!isset($_POST['id'])) {
-                throw new Exception('ID no recibido');
+                throw new \Exception('ID no recibido');
             }
 
-            $userId = $_SESSION['user_id'];
+            $userId = Session::userId();
 
             $this->fileService->delete((int)$_POST['id'], $userId);
 
             $this->response(true, 'Archivo eliminado correctamente');
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->logError($e, "DELETE_ARCHIVO");
         }
     }
@@ -69,20 +81,20 @@ class FileController extends Controller {
 
             $fileId = $_GET['id'] ?? null;
             if (!$fileId) {
-                throw new Exception('ID de archivo requerido');
+                throw new \Exception('ID de archivo requerido');
             }
 
-            $file = $this->fileService->getFileForDownload($fileId, $_SESSION['user_id']);
+            $file = $this->fileService->getFileForDownload($fileId, Session::userId());
 
             if (!$file) {
-                throw new Exception('Archivo no encontrado o acceso denegado');
+                throw new \Exception('Archivo no encontrado o acceso denegado');
             }
 
             // 3. Construir ruta absoluta (fuera de public)
             $filePath = __DIR__ . "/../../../storage/uploads/" . $file['external_id'] . "/" . $file['filename'];
 
             if (!file_exists($filePath)) {
-                throw new Exception('El archivo físico no existe en el servidor');
+                throw new \Exception('El archivo físico no existe en el servidor');
             }
 
             // 4. Configuración de Headers para descarga
@@ -103,12 +115,12 @@ class FileController extends Controller {
             
             // Enviamos el archivo al navegador
             if (readfile($filePath) === false) {
-                throw new Exception("Error al leer el archivo para la descarga.");
+                throw new \Exception("Error al leer el archivo para la descarga.");
             }
             
             exit;
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->logError($e, "DOWNLOAD_FILE");
         }
     }

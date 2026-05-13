@@ -22,7 +22,6 @@ Aplicación web de almacenamiento de archivos desarrollada en PHP puro y JavaScr
 
 **En desarrollo:**
 
-- Refactor del módulo de login y registro (migración a AuthModel)
 - Gestión de cuota dinámica desde el panel de admin
 - Sistema de grupos y roles avanzados
 - Lógica extendida del panel de administración
@@ -40,7 +39,7 @@ El proyecto fue desarrollado siguiendo una arquitectura MVC personalizada en PHP
 ## ⚙️ Tecnologías utilizadas
 
 ### Backend
-- PHP 8+ (POO)
+- PHP 8+ (POO Avanzada con Namespaces y Autoloading lógico)
 - MySQL
 - PDO con prepared statements reales (`ATTR_EMULATE_PREPARES = false`)
 - Arquitectura MVC personalizada
@@ -94,6 +93,7 @@ El proyecto fue desarrollado siguiendo una arquitectura MVC personalizada en PHP
 - Inspección recursiva del contenido de ZIPs
 - Rutas admin protegidas por autenticación + verificación de `role_id`
 - Mensajes de error genéricos al usuario (sin exponer trazas ni SQLSTATE)
+- Gestión de Sesiones Centralizada: Implementación de clase Session para mitigar errores de manipulación directa de $_SESSION.
 
 ---
 
@@ -119,6 +119,7 @@ storage-app/
 │   ├── core/                            # Núcleo del mini framework MVC
 │   │   ├── Controller.php               # Clase base con métodos comunes
 │   │   ├── Router.php                   # Enrutador y dispatcher
+│   │   ├── Session.php                  # Clase Session (Nueva)
 │   │   └── View.php                     # Renderizador de vistas con layout
 │   │
 │   ├── helpers/                         # Utilidades estáticas reutilizables
@@ -209,7 +210,7 @@ index.php → Router → Controller → Service → Model → DB
 |---|---|
 | **Router** | Recibe la URL, valida el verbo HTTP y despacha al controller correcto |
 | **Controllers/web** | Verifican autenticación y renderizan vistas |
-| **Controllers/api** | Verifican autenticación/rol y retornan JSON |
+| **Controllers/api** | Verifican autenticación/rol y retornan JSON, además de un log de error interno en logs/debug.log |
 | **Services** | Contienen toda la lógica de negocio (validaciones, reglas, orquestación) |
 | **Models** | Ejecutan las queries a la BD y retornan datos crudos |
 | **Helpers** | Funciones utilitarias estáticas reutilizables entre servicios |
