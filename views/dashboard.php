@@ -5,9 +5,20 @@
         <h1 class="dashboard-title">Gestión de archivos</h1>
         <input type="file" id="file-input" class="d-none">
         <button id="btn-upload" class="btn-upload">Subir archivo</button>
-        <button id="btn-logout" class="btn btn-outline-light btn-sm">
-            <i class="bi bi-box-arrow-right"></i> Salir
-        </button>
+
+        <!-- Bloque de acciones de navegación/salida -->
+        <div class="header-actions d-inline-flex gap-2 align-items-center">
+
+            <?php if (isset($role_id) && $role_id == 1): ?>
+                <a href="admin/settings" id="btn-admin" class="btn btn-light btn-sm fw-bold">
+                    <i class="bi bi-shield-lock"></i> Panel Admin
+                </a>
+            <?php endif; ?>
+
+            <button id="btn-logout" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-box-arrow-right"></i> Salir
+            </button>
+        </div>
     </div>
 
     <!-- Info usuario -->

@@ -19,7 +19,7 @@ class AuthController extends Controller {
 
     private AuthService $authService;
 
-    public function __construct($pdo) {
+    public function __construct(\PDO $pdo) {
         $this->authService = new AuthService($pdo);
     }
 
@@ -31,7 +31,7 @@ class AuthController extends Controller {
 
             $this->response(true, 'Usuario registrado correctamente', $result);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logError($e, "REGISTER");
         }
     }
@@ -47,7 +47,7 @@ class AuthController extends Controller {
             Session::set('user_name', $user['name']);
 
             $this->response(true, 'Login exitoso', $user);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logError($e, "LOGIN");
         }
     }
@@ -56,7 +56,7 @@ class AuthController extends Controller {
         try {
             Session::destroy();
             $this->response(true, 'Sesión cerrada correctamente');
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logError($e, "LOGOUT");
         }
     }

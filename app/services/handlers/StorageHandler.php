@@ -26,6 +26,17 @@ class StorageHandler {
     }
 
     /**
+     * Construye y retorna la ruta absoluta de un archivo almacenado.
+     * 
+     * @param string $userExtId ID externo del usuario (nombre de la subcarpeta).
+     * @param string $filename Nombre físico del archivo en el disco.
+     * @return string Ruta absoluta completa del archivo.
+     */
+    public function getFilePath(string $userExtId, string $filename): string {
+        return $this->basePath . $userExtId . '/' . $filename;
+    }
+    
+    /**
      * Guardar el archivo en la ruta especificada.
      * @return string
      * @throws \Exception

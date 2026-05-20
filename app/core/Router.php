@@ -19,10 +19,10 @@ class Router {
         // [Carpeta, Controlador, Método, Verbo]
 
         // Rutas para vistas (web)
-        ''                  => ['web','App\Controllers\Web\PageController', 'home', 'GET'],
-        'home'              => ['web','App\Controllers\Web\PageController', 'home', 'GET'],
-        'login'             => ['web','App\Controllers\Web\PageController', 'login', 'GET'],
-        'register'          => ['web','App\Controllers\Web\PageController', 'register', 'GET'],
+        ''                  => ['web','App\Controllers\Web\AuthController', 'home', 'GET'],
+        'home'              => ['web','App\Controllers\Web\AuthController', 'home', 'GET'],
+        'login'             => ['web','App\Controllers\Web\AuthController', 'login', 'GET'],
+        'register'          => ['web','App\Controllers\Web\AuthController', 'register', 'GET'],
         'dashboard'         => ['web','App\Controllers\Web\DashboardController', 'dashboard', 'GET'],
         'admin/settings'    => ['web','App\Controllers\Web\AdminSettingController', 'index', 'GET'],
 
@@ -34,10 +34,10 @@ class Router {
         'auth/logout'   => ['api','App\Controllers\Api\AuthController', 'logout', 'POST'],
 
         // Rutas para gestión de archivos
-        'files/list'    => ['api','App\Controllers\Api\FileController', 'list', 'GET'],
-        'files/upload'  => ['api','App\Controllers\Api\FileController', 'upload', 'POST'],
-        'files/delete'  => ['api','App\Controllers\Api\FileController', 'delete', 'POST'],
-        'files/download' => ['api', 'App\Controllers\Api\FileController', 'download', 'GET'],
+        'files/list'    => ['api','App\Controllers\Api\DashboardController', 'list', 'GET'],
+        'files/upload'  => ['api','App\Controllers\Api\DashboardController', 'upload', 'POST'],
+        'files/delete'  => ['api','App\Controllers\Api\DashboardController', 'delete', 'POST'],
+        'files/download' => ['api', 'App\Controllers\Api\DashboardController', 'download', 'GET'],
 
         // Rutas para configuración de administración
         'settings/file-restrictions' => [
@@ -46,8 +46,15 @@ class Router {
         'settings/file-restrictions/save' => [
             'api','App\Controllers\Api\AdminSettingController', 'saveFileRestrictions', 'POST'
         ],
+        'settings/quota-global-limit/save' => [
+            'api','App\Controllers\Api\AdminSettingController', 'saveQuotaGlobalLimit', 'POST'
+        ],
+        'settings/quota-global-limit/list' => [
+            'api','App\Controllers\Api\AdminSettingController', 'getQuotaGlobalLimit', 'GET'
+        ],
     ];
 
+    // No sé si esto se pueda omitir y usar el método de core/controller.php
     private function jsonResponse($status, $message, $code = 200) {
         http_response_code($code);
         header('Content-Type: application/json');
@@ -65,7 +72,9 @@ class Router {
         $url = trim($_GET['url'] ?? '', '/');
 
         if (!array_key_exists($url, $this->routes)) {
-            $this->jsonResponse(false, 'Ruta no encontrada', 404);
+            http_response_code(404);
+            require_once __DIR__ . '/../../views/404.php';
+            exit;
         }
 
         // Asigna el controlador y método a las variables según la ruta
@@ -96,11 +105,9 @@ class Router {
             $this->jsonResponse(false, 'Método no implementado', 500);
         }
 
-        $pdo = null;
-        if($controllerName !== 'App\Controllers\Web\PageController'){
-            $database = new Database();
-            $pdo = $database->getConnection();
-        }
+        // Instanciamos la base de datos de forma uniforme para TODOS los controladores
+        $database = new Database();
+        $pdo = $database->getConnection();
 
         // Instancia el controlador pasándole la conexión PDO
         $controller = new $controllerName($pdo);

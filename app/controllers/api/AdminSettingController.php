@@ -16,7 +16,7 @@ class AdminSettingController extends Controller {
 
     private AdminSettingService $settingsService;
 
-    public function __construct($pdo) {
+    public function __construct(\PDO $pdo) {
         $this->settingsService = new AdminSettingService($pdo);
     }
 
@@ -25,7 +25,7 @@ class AdminSettingController extends Controller {
             $this->requireAdmin();
             $restrictions = $this->settingsService->getFileRestrictions();
             $this->response(true, 'Restricciones de archivos obtenidas', $restrictions);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $this->logError($e, "GET_FILE_RESTRICTIONS");
         }
     }
@@ -34,11 +34,10 @@ class AdminSettingController extends Controller {
         try {
 
             $this->requireAdmin();
-
             $data = $this->getRequestData();
 
             if (!isset($data['extensions'])) {
-                throw new Exception('No se recibieron extensiones.');
+                throw new \Exception('No se recibieron extensiones.');
             }
 
             $extensions = [
@@ -46,28 +45,31 @@ class AdminSettingController extends Controller {
             ];
 
             $result = $this->settingsService->updateFileRestrictions($extensions);
+            $this->response(true, 'Extensiones restringidas actualizadas correctamente.', $result);
 
-            $this->response(
-                true,
-                'Extensiones restringidas de archivos actualizadas correctamente.',
-                $result
-            );
-
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $this->logError($e, "FILE_RESTRICTIONS");
         }
     }
 
-    public function updateGlobalQuota() {
+    public function getQuotaGlobalLimit() {
+        try {
+            $this->requireAdmin();
+            $limit = $this->settingsService->getGlobalQuotaLimit();
+            $this->response(true, 'Límite global de cuota obtenido', $limit);
+        } catch (\Throwable $e) {
+            $this->logError($e, "GET_GLOBAL_QUOTA_LIMIT");
+        }
+    }
+
+    public function saveQuotaGlobalLimit() {
         try {
             $this->requireAdmin();
             $data = $this->getRequestData();
 
             $result = $this->settingsService->updateGlobalQuota($data);
-
             $this->response(true, 'Límite global actualizado', $result);
-
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $this->logError($e, "GLOBAL_QUOTA");
         }
     }

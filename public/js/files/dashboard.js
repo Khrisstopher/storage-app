@@ -109,7 +109,7 @@ async function handleDelete(e) {
         });
     }
 }
-
+// Listar archivos
 async function loadFiles() {
     try {
         const response = await fetch(URL_LIST);

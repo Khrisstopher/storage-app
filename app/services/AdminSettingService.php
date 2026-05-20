@@ -19,6 +19,7 @@ class AdminSettingService {
      * @param \PDO $pdo Instancia de conexión a la base de datos y carga el servicio de Administración de archivos.
      */
     public function __construct(\PDO $pdo) {
+        $this->pdo = $pdo;
         $this->adminModel = new AdminSettingModel($pdo);
     }
 
@@ -61,8 +62,48 @@ class AdminSettingService {
                 throw new \Exception("La extensión '$ext' es demasiado larga.");
             }
         }
-        $this->adminModel->saveBlockedExtensions($extensionsArray);
+
+        $this->pdo->beginTransaction();
+
+        try {
+           $this->adminModel->clearBlockedExtensions();
+
+           foreach ($extensionsArray as $ext) {
+               $this->adminModel->insertBlockedExtension($ext);
+           }
+
+           $this->pdo->commit();
+           return $extensionsArray;
+
+        } catch (\Throwable $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $e;
+        }
 
         return $extensionsArray;
+    }
+
+    public function getGlobalQuotaLimit(): int {
+        return $this->adminModel->getGlobalQuotaLimit();
+    }
+
+    public function updateGlobalQuota($data) {
+        if (!isset($data['limit']) || $data['limit'] === '') {
+            throw new \Exception('No se recibió el límite de cuota global.');
+        }
+
+        if (!is_numeric($data['data']['limit'] ?? $data['limit'])) { 
+            throw new \Exception('El límite de cuota global debe ser un valor numérico válido.');
+        }
+
+        $limit = (int) $data['limit'];
+        if ($limit <= 0) {
+            throw new \Exception('El límite de cuota global debe ser un número positivo.');
+        }
+
+        $this->adminModel->updateGlobalQuotaLimit($limit);
+        return $limit;
     }
 }

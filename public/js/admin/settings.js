@@ -4,6 +4,8 @@
  * @link https://www.linkedin.com/in/khrisstopher/
  */
 document.addEventListener('DOMContentLoaded', async () => {
+
+    // #### Restricciones de archivos ####
     const fileRestrictionsForm = document.getElementById('fileRestrictionsForm');
     const blockedExtensions = document.getElementById('blockedExtensions');
     
@@ -15,6 +17,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Cargar restricciones actuales
     if (blockedExtensions) {
         loadFileRestrictions(blockedExtensions);
+    }
+
+    // #### Límite de cuota global de almacenamiento por usuario ####
+
+    const globalQuotaForm = document.getElementById('globalQuotaForm');
+    const globalQuota = document.getElementById('globalQuota');
+
+    if (globalQuotaForm) {
+        globalQuotaForm.addEventListener('submit', saveQuotaGlobalLimit);
+    }
+
+    if (globalQuota) {
+        loadQuotaGlobalLimit(globalQuota);
     }
 });
 
@@ -34,9 +49,8 @@ async function loadFileRestrictions(inputElement) {
 
         if (!result.status) throw new Error(result.message);
 
-        // Pintamos los datos (asumiendo que vienen como array)
+        // Pintamos los datos
         inputElement.value = result.data.join(', ');
-
     } catch (err) {
         Toast.fire({
             icon: 'error',
@@ -76,13 +90,89 @@ async function saveFileRestrictions(e) {
         if (!result.status) {
             throw new Error(result.message);
         }
+        blockedExtensions.value = '';
+
+        setTimeout(() => { // Esto es para notar el cambio
+            blockedExtensions.value = result.data.join(', ');
+        }, 50);
 
         Toast.fire({
             icon: 'success',
             title: result.message
         });
-        // Acá hace falta mostrar la nueva extención en el input sin recargar
+    } catch (err) {
+        Toast.fire({
+            icon: 'error',
+            title: err.message || 'Error inesperado'
+        });
+    }
+}
 
+
+/**
+ * Cargar el límite global de cuota de almacenamiento para todos los usuarios
+ */
+async function loadQuotaGlobalLimit(globalQuota) {
+    try {
+        const response = await fetch(window.BASE_URL + 'settings/quota-global-limit/list');
+
+        const result = await response.json().catch(() => {
+            throw new Error('Respuesta no válida del servidor');
+        });
+
+        if (!result.status) throw new Error(result.message);
+
+        globalQuota.value = result.data
+    } catch (err) {
+        Toast.fire({
+            icon: 'error',
+            title: err.message || 'Error al cargar el límite global de cuota'
+        });
+    }
+}
+
+/**
+ * Guarda el nuevo límite global de cuota de almacenamiento por usuario
+ * @param {*} e 
+ */
+async function saveQuotaGlobalLimit(e) {
+    e.preventDefault();
+
+    const form = e.currentTarget;
+    const newLimit = form.globalQuota ? form.globalQuota.value.trim() : '';
+    if (!newLimit) return;
+
+    try {
+        const response = await fetch(window.BASE_URL + 'settings/quota-global-limit/save',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    limit: newLimit
+                })
+            }
+        );
+
+        const result = await response.json().catch(() => {
+            throw new Error('Respuesta no válida del servidor');
+        });
+
+        if (!result.status) {
+            throw new Error(result.message);
+        }
+
+        globalQuota.value = '';
+
+        setTimeout(() => { // Esto es para notar el cambio
+            globalQuota.value = newLimit;
+        }, 50);
+
+        Toast.fire({
+            icon: 'success',
+            title: result.message
+        });
     } catch (err) {
         Toast.fire({
             icon: 'error',

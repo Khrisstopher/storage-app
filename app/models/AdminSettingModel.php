@@ -22,38 +22,38 @@ class AdminSettingModel {
      * @throws \PDOException
      */
     public function getFileRestrictions(): array {
-        try {
-            $stmt = $this->pdo->query("SELECT extension FROM blocked_extensions");
-            return $stmt->fetchAll(\PDO::FETCH_COLUMN, 0) ?: [];
-        } catch (\PDOException $e) {
-            throw $e;
-        }
+        $stmt = $this->pdo->query("SELECT extension FROM blocked_extensions");
+        return $stmt->fetchAll(\PDO::FETCH_COLUMN, 0) ?: [];
+    }
+
+    public function clearBlockedExtensions(): void {
+        $this->pdo->exec("DELETE FROM blocked_extensions");
+    }
+
+    public function insertBlockedExtension(string $ext): void {
+        $stmt = $this->pdo->prepare("INSERT INTO blocked_extensions (extension) VALUES (:ext)");
+        $stmt->execute([':ext' => $ext]);
+    }
+
+    public function getGlobalQuotaLimit(): int {
+        $stmt = $this->pdo->query("SELECT max_upload_size FROM settings WHERE id = 1");
+        return (int) ($stmt->fetchColumn() ?: 0);
     }
 
     /**
-     * Guardar extensiones restringidas.
+     * Guarda o actualiza el límite máximo de peso acumulado para el sistema.
+     * @param int $limit Peso en bytes (o la unidad que manejes).
      * @throws \PDOException
      */
-    public function saveBlockedExtensions(array $extensions): void {
-        try {
-            $this->pdo->beginTransaction();
+    public function updateGlobalQuotaLimit(int $limit): void {
+        $sql = "INSERT INTO settings (id, max_upload_size) 
+                VALUES (1, :limit) 
+                ON DUPLICATE KEY UPDATE max_upload_size = :limit2";
 
-            // Limpiar tabla actual
-            $this->pdo->exec("DELETE FROM blocked_extensions");
-
-            $stmt = $this->pdo->prepare("INSERT INTO blocked_extensions (extension) VALUES (:ext)");
-            
-            foreach ($extensions as $ext) {
-                $stmt->execute([':ext' => $ext]);
-            }
-
-            $this->pdo->commit();
-
-        } catch (\PDOException $e) {
-            if ($this->pdo->inTransaction()) {
-                $this->pdo->rollBack();
-            }
-            throw $e;
-        }
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':limit'  => $limit,
+            ':limit2' => $limit
+        ]);
     }
 }

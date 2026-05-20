@@ -37,7 +37,8 @@ class Controller {
             'status' => $status,
             'message'    => $message,
             'data'   => $data
-        ]);exit;
+        ]);
+        exit;
     }
 
     // Validar el formato correcto de los datos recibidos en el cuerpo de la solicitud
@@ -78,13 +79,13 @@ class Controller {
     }
 
     // Para registrar errores en el log y enviar una respuesta genérica al usuario, evitando mostrar detalles técnicos
-    protected function logError(\Exception $e, $context = "GENERAL") {
+    protected function logError(\Throwable $e, $context = "GENERAL") {
         error_log(" [{$context}_ERROR] " . $e->getMessage());
 
         $mensajeUsuario = $e->getMessage();
 
         // Filtramos SOLO si detectamos errores técnicos conocidos
-        if ($e instanceof \PDOException) {
+        if ($e instanceof \PDOException || $e instanceof \Error) {
             $mensajeUsuario = "Error de base de datos. Por favor, contacte al soporte.";
         }
 

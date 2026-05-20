@@ -14,15 +14,15 @@ Aplicación web de almacenamiento de archivos desarrollada en PHP puro y JavaScr
 - Dashboard de usuario con gestión de archivos
 - Subida, listado, descarga y eliminación de archivos
 - Validación de extensiones prohibidas (incluyendo contenido de archivos ZIP)
-- Control de cuota de almacenamiento por usuario
 - Router MVC personalizado con separación de rutas web y API
 - Panel de administración con restricción de extensiones
 - Sistema de roles (admin / usuario)
 - Protección de rutas por autenticación y rol
+- Gestión de cuota dinámica desde el panel de admin
+- Límite de cuota establecido en gerarquía de usuario --> grupo --> global
 
 **En desarrollo:**
-
-- Gestión de cuota dinámica desde el panel de admin
+- Control de cuota de almacenamiento por usuario
 - Sistema de grupos y roles avanzados
 - Lógica extendida del panel de administración
 
@@ -41,7 +41,7 @@ El proyecto fue desarrollado siguiendo una arquitectura MVC personalizada en PHP
 ### Backend
 - PHP 8+ (POO Avanzada con Namespaces y Autoloading lógico)
 - MySQL
-- PDO con prepared statements reales (`ATTR_EMULATE_PREPARES = false`)
+- PDO
 - Arquitectura MVC personalizada
 
 ### Frontend
@@ -231,7 +231,7 @@ El router diferencia dos tipos de rutas:
 ### Requisitos
 
 - PHP 8.0+
-- MySQL 5.7+ o MariaDB
+- MySQL 5.7+
 - Apache con `mod_rewrite` habilitado
 - XAMPP (u otro entorno local equivalente)
 
@@ -290,6 +290,8 @@ Password: admin123
 | `GET` | `/files/download?id={id}` | Descargar archivo | Sí |
 | `GET` | `/settings/file-restrictions` | Obtener extensiones bloqueadas | Admin |
 | `POST` | `/settings/file-restrictions/save` | Actualizar extensiones bloqueadas | Admin |
+| `GET` | `/settings/quota-global-limit/list` | Obtener el límite de cuota global | Admin |
+| `POST` | `/settings/quota-global-limit/save` | Actualizar el límite de cuota global | Admin |
 
 Todas las respuestas tienen la estructura:
 

@@ -11,12 +11,7 @@ require_once __DIR__ . '/../../core/Controller.php';
  * @author Khrisstopher
  * @link https://www.linkedin.com/in/khrisstopher/
  */
-class PageController extends Controller {
-    private ?\PDO $pdo;
-
-    public function __construct($pdo = null) {
-        $this->pdo = $pdo;
-    }
+class AuthController extends Controller {
 
     // Página de entrada
     public function home() {

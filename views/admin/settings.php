@@ -74,7 +74,8 @@
                             <input 
                                 type="number"
                                 class="form-control"
-                                id="globalQuota"
+                                id="globalQuota" 
+                                name="globalQuota"
                                 placeholder="Ejemplo: 10"
                                 min="1"
                             >

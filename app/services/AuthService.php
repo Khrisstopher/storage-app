@@ -46,24 +46,17 @@ class AuthService {
         $this->validateEmail($email);
         if (strlen($password) < 8) throw new \Exception('La contraseña debe tener al menos 8 caracteres');
 
-        if ($this->authModel->emailExists($email)) {
-            throw new \Exception('El correo ya está registrado');
-        }
+        if ($this->authModel->emailExists($email)) throw new \Exception('El correo ya está registrado');
 
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         $userExternalId = bin2hex(random_bytes(16));
 
-        try {
-            $this->authModel->createUser([
-                'external_id' => $userExternalId,
-                'name' => $name,
-                'email' => $email,
-                'password' => $hashedPassword
-            ]);
-        } catch (\Exception $e) {
-            throw new \Exception('Error al registrar usuario en el sistema');
-        }
-
+        $this->authModel->createUser([
+            'external_id' => $userExternalId,
+            'name' => $name,
+            'email' => $email,
+            'password' => $hashedPassword
+        ]);
         return true;
     }
 
@@ -80,11 +73,7 @@ class AuthService {
         if (!$email || !$password) throw new \Exception('Datos incompletos');
         $this->validateEmail($email);
 
-        try {
-            $user = $this->authModel->getUserByEmail($email);
-        } catch (\Exception $e) {
-            throw new \Exception('Error al iniciar sesión');
-        }
+        $user = $this->authModel->getUserByEmail($email);
 
         if (!$user || !password_verify($password, $user['password'])) {
             throw new \Exception('Credenciales inválidas');
