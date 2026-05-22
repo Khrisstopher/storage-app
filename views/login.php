@@ -8,8 +8,6 @@
         <p class="login-subtitle mb-4">
             Inicia sesión en <span>Storage App</span> para gestionar tus archivos de manera eficiente y segura.
         </p>
-
-        <!-- Alerta de error (oculta por defecto) -->
         <div id="alert-error" class="alert alert-danger d-none" role="alert"></div>
 
         <form id="login-form" novalidate> <!-- No validación del navegador -->

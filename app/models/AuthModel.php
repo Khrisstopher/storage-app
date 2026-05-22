@@ -19,7 +19,8 @@ class AuthModel {
 
     /**
      * Verificar si un email ya existe.
-     * @throws \PDOException
+     * @param string $email El email a verificar.
+     * @return bool Retorna true si el email existe, false si no.
      */
     public function emailExists($email) {
         $stmt = $this->pdo->prepare("SELECT id FROM users WHERE email = ?");
@@ -29,7 +30,8 @@ class AuthModel {
 
     /**
      * Insertar el nuevo usuario.
-     * @throws \PDOException
+     * @param array $data Datos del usuario a insertar.
+     * @return bool Retorna true si la inserción fue exitosa, false si no
      */
     public function createUser($data) {
         $stmt = $this->pdo->prepare("INSERT INTO users (external_id, name, email, password, role_id) 
@@ -45,7 +47,8 @@ class AuthModel {
 
     /**
      * Obtener usuario por email.
-     * @throws \PDOException
+     * @param string $email El email del usuario a obtener.
+     * @return array|false Retorna los datos del usuario si se encuentra, false si
      */
     public function getUserByEmail($email) {
         $stmt = $this->pdo->prepare("SELECT id, name, email, password, role_id 

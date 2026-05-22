@@ -61,7 +61,6 @@ class Router {
         'users/delete' => ['api','App\Controllers\Api\UserController', 'delete', 'DELETE'],
     ];
 
-    // No sé si esto se pueda omitir y usar el método de core/controller.php
     private function jsonResponse($status, $message, $code = 200) {
         http_response_code($code);
         header('Content-Type: application/json');

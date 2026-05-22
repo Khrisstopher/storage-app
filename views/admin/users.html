@@ -20,29 +20,39 @@
 <!-- Modal para editar usuario -->
 <div class="modal fade" id="editUserModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 rounded-4 shadow">
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold" id="editUserModalLabel">Modificar Usuario</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content modal-custom-dark rounded-4 shadow-lg">
+            
+            <div class="modal-header border-bottom border-secondary border-opacity-25">
+                <h5 class="modal-title fw-bold text-white" id="editUserModalLabel">
+                    Modificar <span class="text-gradient-custom">Usuario</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+            
             <form id="editUserForm">
                 <div class="modal-body">
                     <input type="hidden" id="editUserId">
+                    
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold">Asignar a Grupo</label>
-                        <select class="form-select" id="editUserGroup"></select>
+                        <label class="form-label small fw-semibold text-light-custom">Asignar a Grupo</label>
+                        <select class="form-select select-custom-dark text-white" id="editUserGroup"></select>
                     </div>
+                    
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold">Cuota Exclusiva de Usuario (MB)</label>
-                        <input type="number" class="form-control" id="editUserQuota" min="0" placeholder="Dejar en blanco para usar cuota de grupo/global">
-                        <div class="form-text text-danger">Este límite tiene la máxima prioridad en el sistema.</div>
+                        <label class="form-label small fw-semibold text-light-custom">Cuota Exclusiva de Usuario (MB)</label>
+                        <input type="number" class="form-control input-custom-dark text-white" id="editUserQuota" min="0" placeholder="Dejar en blanco para usar cuota de grupo/global">
+                        <div class="form-text text-danger-custom small mt-1">
+                            <i class="bi bi-exclamation-circle-fill me-1"></i> Este límite tiene la máxima prioridad en el sistema.
+                        </div>
                     </div>
                 </div>
+                
                 <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-dark rounded-pill px-4">Guardar Cambios</button>
+                    <button type="button" class="btn btn-cancel-custom rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-home-style rounded-pill px-4">Guardar Cambios</button>
                 </div>
             </form>
+            
         </div>
     </div>
 </div>

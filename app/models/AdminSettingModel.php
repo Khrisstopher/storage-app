@@ -19,7 +19,7 @@ class AdminSettingModel {
 
     /**
      * Obtener extensiones restringidas.
-     * @throws \PDOException
+     * @return array Lista de extensiones bloqueadas.
      */
     public function getFileRestrictions(): array {
         $stmt = $this->pdo->query("SELECT extension FROM blocked_extensions");
@@ -27,7 +27,7 @@ class AdminSettingModel {
     }
 
     /**
-     * Elimina todas las extensiones bloqueadas para luego insertar las nuevas. 
+     * Elimina todas las extensiones bloqueadas para luego insertar las nuevas.
      */
     public function clearBlockedExtensions(): void {
         $this->pdo->exec("DELETE FROM blocked_extensions");
@@ -36,7 +36,6 @@ class AdminSettingModel {
     /**
      * Agrega extensiones a la lista de bloqueadas.
      * @param string $ext Extensión sin el punto (ej: 'exe', 'php').
-     * @throws \PDOException
      */
     public function insertBlockedExtension(string $ext): void {
         $stmt = $this->pdo->prepare("INSERT INTO blocked_extensions (extension) VALUES (:ext)");
@@ -57,53 +56,53 @@ class AdminSettingModel {
         return (int) ($stmt->fetchColumn() ?: 0);
     }
 
+    #### Actualización de cuota global ####
+
     /**
-     * Guarda o actualiza el límite máximo en bytes para la cuota del sistema global.
-     * @param int $limit Peso en bytes.
-     * @throws \PDOException
+     * Obtiene el ID de la cuota global desde los settings.
+     * @return int|null
      */
-    public function updateGlobalQuotaLimit(int $limit): void {
-        try {
-            $this->pdo->beginTransaction();
+    public function getGlobalQuotaId(): ?int {
+        $stmt = $this->pdo->query("SELECT quota_id FROM settings WHERE id = 1");
+        $id = $stmt->fetchColumn();
+        return $id ? (int)$id : null;
+    }
 
-            // Verificar si ya existe una cuota global
-            $stmt = $this->pdo->query("SELECT quota_id FROM settings WHERE id = 1");
-            $quotaId = $stmt->fetchColumn();
+    /**
+     * Actualiza los bytes de una cuota existente
+     * @param int $quotaId ID de la cuota a actualizar
+     * @param int $limit Nuevo límite en bytes
+     * @return bool Retorna true si la actualización fue exitosa, false en caso contrario
+     */
+    public function updateQuotaBytes(int $quotaId, int $limit): bool {
+        $sql = "UPDATE quotas SET quota_bytes = :limit WHERE id = :quota_id";
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute([':limit' => $limit, ':quota_id' => $quotaId]);
+    }
 
-            if ($quotaId) {
-                // Si ya existe, actualizamos los bytes directamente en la tabla de cuotas
-                $sqlQuota = "UPDATE quotas SET quota_bytes = :limit WHERE id = :quota_id";
-                $stmtQuota = $this->pdo->prepare($sqlQuota);
-                $stmtQuota->execute([
-                    ':limit'    => $limit,
-                    ':quota_id' => $quotaId
-                ]);
-            } else {
-                // Si no existe, creamos la cuota primero
-                $sqlNewQuota = "INSERT INTO quotas (name, quota_bytes, description) 
-                                VALUES ('Sistema Global', :limit, 'Cuota por defecto para todo el sistema')";
-                $stmtNewQuota = $this->pdo->prepare($sqlNewQuota);
-                $stmtNewQuota->execute([':limit' => $limit]);
-                
-                $newQuotaId = $this->pdo->lastInsertId();
+    /**
+     * Inserta una nueva cuota global y la vincula en settings.
+     * @param int $limit Límite en bytes para la cuota global.
+     * @return void
+     */
+    public function createGlobalQuotaSetting(int $limit): void {
+        // Insertar la cuota
+        $sqlNewQuota = "INSERT INTO quotas (name, quota_bytes, description) 
+                        VALUES ('Sistema Global', :limit, 'Cuota por defecto para todo el sistema')";
+        $stmtNewQuota = $this->pdo->prepare($sqlNewQuota);
+        $stmtNewQuota->execute([':limit' => $limit]);
+        
+        $newQuotaId = $this->pdo->lastInsertId();
 
-                // Y luego lo vinculamos en la tabla de settings
-                $sqlSettings = "INSERT INTO settings (id, quota_id) VALUES (1, :quota_id)";
-                $stmtSettings = $this->pdo->prepare($sqlSettings);
-                $stmtSettings->execute([':quota_id' => $newQuotaId]);
-            }
-
-            $this->pdo->commit();
-        } catch (\PDOException $e) {
-            if ($this->pdo->inTransaction()) {
-                $this->pdo->rollBack();
-            }
-            throw $e;
-        }
+        // Vincular en settings
+        $sqlSettings = "INSERT INTO settings (id, quota_id) VALUES (1, :quota_id)";
+        $stmtSettings = $this->pdo->prepare($sqlSettings);
+        $stmtSettings->execute([':quota_id' => $newQuotaId]);
     }
 
     /**
      * Busca si el usuario tiene una cuota específica asignada directamente.
+     * @param int $userId ID del usuario.
      * @return int|null Retorna el límite en bytes o null si no tiene cuota personalizada.
      */
     public function getQuotaByUserId(int $userId): ?int {
@@ -114,14 +113,13 @@ class AdminSettingModel {
                 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':user_id' => $userId]);
-        
-        // Retorna el entero si existe, o null si la columna quota_id es NULL
         $res = $stmt->fetchColumn();
         return $res !== false ? (int)$res : null;
     }
 
     /**
      * Busca la cuota asignada al grupo al que pertenece el usuario.
+     * @param int $userId ID del usuario.
      * @return int|null Retorna el límite en bytes o null si el grupo no tiene cuota asignada.
      */
     public function getQuotaByGroupId(int $userId): ?int {
@@ -133,7 +131,6 @@ class AdminSettingModel {
                 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':user_id' => $userId]);
-        
         $res = $stmt->fetchColumn();
         return $res !== false ? (int)$res : null;
     }

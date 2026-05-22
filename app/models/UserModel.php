@@ -48,6 +48,9 @@ class UserModel {
 
     /**
      * Registra una nueva cuota y retorna su ID
+     * @param string $name Nombre descriptivo de la cuota
+     * @param int $bytes Límite máximo en bytes
+     * @return int ID de la cuota creada
      */
     public function createQuota(string $name, int $bytes): int {
         $sql = "INSERT INTO quotas (name, quota_bytes, description) 
@@ -59,6 +62,8 @@ class UserModel {
 
     /**
      * Actualiza una cuota existente
+     * @param int $quotaId ID de la cuota a actualizar
+     * @param int $bytes Nuevo límite en bytes
      */
     public function updateQuota(int $quotaId, int $bytes): void {
         $sql = "UPDATE quotas SET quota_bytes = :bytes WHERE id = :quota_id";
@@ -68,6 +73,7 @@ class UserModel {
 
     /**
      * Elimina una cuota específica
+     * @param int $quotaId ID de la cuota a eliminar
      */
     public function deleteQuota(int $quotaId): void {
         $stmt = $this->pdo->prepare("DELETE FROM quotas WHERE id = :quota_id");
@@ -76,6 +82,9 @@ class UserModel {
 
     /**
      * Actualiza el grupo y la cuota de un usuario en el sistema
+     * @param int $id ID del usuario a actualizar
+     * @param int|null $groupId Nuevo ID de grupo o null para sin grupo
+     * @param int|null $quotaId Nuevo ID de cuota o null para sin cuota
      */
     public function updateUserFields(int $id, ?int $groupId, ?int $quotaId): bool {
         $sql = "UPDATE users SET group_id = :group_id, quota_id = :quota_id WHERE id = :id";
@@ -85,5 +94,15 @@ class UserModel {
             'quota_id' => $quotaId,
             'id' => $id
         ]);
+    }
+
+    /**
+     * Elimina físicamente el registro del usuario por su ID
+     * @param int $id
+     * @return bool
+     */
+    public function deleteUser(int $id): bool {
+        $stmt = $this->pdo->prepare("DELETE FROM users WHERE id = :id");
+        return $stmt->execute(['id' => $id]);
     }
 }

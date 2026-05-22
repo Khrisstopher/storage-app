@@ -84,8 +84,6 @@ class AdminSettingService {
             }
             throw $e;
         }
-
-        return $extensionsArray;
     }
 
     /**
@@ -98,15 +96,16 @@ class AdminSettingService {
     }
 
     /**
-     * Procesa, valida y guarda el nuevo límite de cuota global.
+     * Procesa, valida y guarda el nuevo límite de cuota global dentro de una transacción.
      * @param array $data Datos provenientes del formulario.
+     * @throws \Exception|\Throwable
      */
     public function updateGlobalQuota($data) {
         if (!isset($data['limit']) || $data['limit'] === '') {
             throw new \Exception('No se recibió el límite de cuota global.');
         }
 
-        if (!is_numeric($data['data']['limit'] ?? $data['limit'])) { 
+        if (!is_numeric($data['limit'])) { 
             throw new \Exception('El límite de cuota global debe ser un valor numérico válido.');
         }
 
@@ -115,11 +114,28 @@ class AdminSettingService {
             throw new \Exception('El límite de cuota global debe ser un número positivo.');
         }
 
-        // Convertimos los MB validados a bytes reales
-        $limitInBytes = $limitMb * 1024 * 1024;
+        $limitInBytes = FileHelper::mbToBytes($limitMb);
 
-        $this->adminModel->updateGlobalQuotaLimit($limitInBytes);
-        return true;
+        try {
+            $this->pdo->beginTransaction();
+
+            $quotaId = $this->adminModel->getGlobalQuotaId();
+
+            if ($quotaId) {
+                $this->adminModel->updateQuotaBytes($quotaId, $limitInBytes);
+            } else {
+                $this->adminModel->createGlobalQuotaSetting($limitInBytes);
+            }
+
+            $this->pdo->commit();
+            return true;
+
+        } catch (\Throwable $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $e;
+        }
     }
 
     /**

@@ -170,7 +170,6 @@ function createFileCard(file) {
         <div class="d-flex align-items-center gap-3 mb-2">
             <i class="bi ${icon} fs-3"></i>
             <div class="flex-grow-1 overflow-hidden">
-                <!-- Aquí inyectamos el nombre ya sanitizado de forma segura -->
                 <div class="fw-semibold text-truncate">${safeName}</div>
                 <div class="small file-size">${displaySize}</div>
             </div>

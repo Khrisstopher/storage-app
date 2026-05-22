@@ -2,7 +2,12 @@
 
     <!-- Header -->
     <div class="dashboard-header">
-        <h1 class="dashboard-title">Gestión de archivos</h1>
+
+        <div class="d-flex align-items-center gap-3">
+            <img src="img/KHRISM.png" alt="Logo de Storage App" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" class="dashboard-logo">
+            <h1 class="dashboard-title mb-0">Gestión de archivos</h1>
+        </div>
+
         <input type="file" id="file-input" class="d-none">
         <button id="btn-upload" class="btn-upload">Subir archivo</button>
 
@@ -11,7 +16,7 @@
 
             <?php if (isset($role_id) && $role_id == 1): ?>
                 <a href="admin/settings" id="btn-admin" class="btn btn-light btn-sm fw-bold">
-                    <i class="bi bi-shield-lock"></i> Panel Admin
+                    <i class="bi bi-shield-lock"></i> Panel Administración
                 </a>
             <?php endif; ?>
 

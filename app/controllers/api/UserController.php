@@ -30,6 +30,7 @@ class UserController extends Controller {
             $this->logError($e, "GET_USERS");
         }
     }
+
     public function update() {
         try {
             $this->requireAdmin();
@@ -40,6 +41,7 @@ class UserController extends Controller {
             $this->logError($e, "UPDATE_USER");
         }
     }
+
     public function delete() {
         try {
             $this->requireAdmin();

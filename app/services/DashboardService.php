@@ -44,7 +44,7 @@ class DashboardService {
         $finalName = $originalName;
         $counter = 1;
 
-        // Bucle: Mientras el nombre exista en la tabla para ese user_id, incrementamos
+        // Mientras el nombre exista en la tabla para ese user_id, incrementamos
         while ($this->dashboardModel->originalNameExists($finalName, $userId)) {
             $finalName = $basename . " ($counter)" . $extension;
             $counter++;

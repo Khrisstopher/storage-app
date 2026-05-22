@@ -43,131 +43,124 @@ class GroupModel {
         return $stmt->fetch(\PDO::FETCH_ASSOC) ?: null;
     }
 
+    #### FUNCIONES DE CREACIÓN ####
+
     /**
-     * Crea una cuota y un grupo dentro de una transacción segura.
-     * @param array $data Contiene 'name', 'quota_mb' y opcionalmente 'description'
-     * @return array Datos combinados del registro creado.
+     * Inserta una nueva cuota en la tabla quotas.
+     * @param string $name Nombre descriptivo de la cuota.
+     * @param int $bytes Límite máximo en bytes.
+     * @param string|null $description Descripción de la cuota.
+     * @return int ID de la cuota generada.
      */
-    public function createGroup(array $data) {
-        try {
-            $this->pdo->beginTransaction();
-
-            $quotaMb = (int)$data['quota_mb'];
-            $quotaBytes = $quotaMb * 1024 * 1024;
-
-            // Insertar primero en la tabla `quotas`
-            $quotaSql = "INSERT INTO quotas (name, quota_bytes, description) 
-                         VALUES (:name, :quota_bytes, :description)";
-            
-            $quotaStmt = $this->pdo->prepare($quotaSql);
-            $quotaStmt->execute([
-                'name' => "Cuota Grupo: " . $data['name'],
-                'quota_bytes' => $quotaBytes,
-                'description' => "Límite asignado automáticamente al crear el grupo."
-            ]);
-
-            $quotaId = $this->pdo->lastInsertId();
-
-            // Insertar en la tabla `groups` usando el quota_id obtenido
-            $groupSql = "INSERT INTO groups (name, description, quota_id) 
-                         VALUES (:name, :description, :quota_id)";
-            
-            $groupStmt = $this->pdo->prepare($groupSql);
-            $groupStmt->execute([
-                'name' => $data['name'],
-                'description' => $data['description'] ?? null,
-                'quota_id' => $quotaId
-            ]);
-
-            $groupId = $this->pdo->lastInsertId();
-            $this->pdo->commit();
-
-            return [
-                'id' => $groupId,
-                'name' => $data['name'],
-                'quota_id' => $quotaId,
-                'quota_bytes' => $quotaBytes
-            ];
-
-        } catch (\Throwable $e) {
-            if ($this->pdo->inTransaction()) {
-                $this->pdo->rollBack();
-            }
-            throw $e;
-        }
+    public function insertQuota(string $name, int $bytes, ?string $description = null): int {
+        $sql = "INSERT INTO quotas (name, quota_bytes, description) 
+                VALUES (:name, :quota_bytes, :description)";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            'name' => $name,
+            'quota_bytes' => $bytes,
+            'description' => $description
+        ]);
+        return (int)$this->pdo->lastInsertId();
     }
 
     /**
-     * Actualiza un grupo existente y su cuota asociada dentro de una transacción.
-     * @param int $id ID del grupo a actualizar.
-     * @param array $data Datos a actualizar ('name', 'quota_mb', 'description').
-     * @return array Datos del grupo actualizado.
+     * Inserta un nuevo grupo en la tabla groups.
+     * @param string $name Nombre único del grupo.
+     * @param int $quotaId ID de la cuota asociada.
+     * @param string|null $description Descripción del grupo.
+     * @return int ID del grupo generado.
      */
-    public function updateGroup($id, $data) {
-        try {
-            // Obtener el grupo actual para conocer su quota_id antes de modificar nada
-            $stmtFetch = $this->pdo->prepare("SELECT quota_id FROM groups WHERE id = :id LIMIT 1");
-            $stmtFetch->execute(['id' => $id]);
-            $group = $stmtFetch->fetch(\PDO::FETCH_ASSOC);
-
-            if (!$group) {
-                throw new \Exception("El grupo especificado no existe.");
-            }
-
-            $quotaId = $group['quota_id'];
-
-            $this->pdo->beginTransaction();
-
-            $quotaMb = (int)$data['quota_mb'];
-            $quotaBytes = $quotaMb * 1024 * 1024;
-
-            $quotaSql = "UPDATE quotas 
-                         SET name = :quota_name, quota_bytes = :quota_bytes 
-                         WHERE id = :quota_id";
-            
-            $quotaStmt = $this->pdo->prepare($quotaSql);
-            $quotaStmt->execute([
-                'quota_name' => "Cuota Grupo: " . $data['name'],
-                'quota_bytes' => $quotaBytes,
-                'quota_id' => $quotaId
-            ]);
-
-            $groupSql = "UPDATE groups 
-                         SET name = :name, description = :description 
-                         WHERE id = :id";
-            
-            $groupStmt = $this->pdo->prepare($groupSql);
-            $groupStmt->execute([
-                'name' => $data['name'],
-                'description' => $data['description'] ?? null,
-                'id' => $id
-            ]);
-
-            $this->pdo->commit();
-
-            return [
-                'id' => $id,
-                'name' => $data['name'],
-                'quota_id' => $quotaId,
-                'quota_mb' => $quotaMb
-            ];
-
-        } catch (\Throwable $e) {
-            if ($this->pdo->inTransaction()) {
-                $this->pdo->rollBack();
-            }
-            throw $e;
-        }
+    public function insertGroupDetails(string $name, int $quotaId, ?string $description = null): int {
+        $sql = "INSERT INTO groups (name, quota_id, description) 
+                VALUES (:name, :quota_id, :description)";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            'name' => $name,
+            'quota_id' => $quotaId,
+            'description' => $description
+        ]);
+        return (int)$this->pdo->lastInsertId();
     }
 
+    #### FUNCIONES DE ACTUALIZACIÓN  ####
 
     /**
-     * Elimina un grupo y su cuota asociada dentro de una transacción.
+     * Obtiene un grupo por su ID junto con su quota_id.
+     * @param int $id ID del grupo.
+     * @return array|null
+     */
+    public function getGroupById($id) {
+        $stmt = $this->pdo->prepare("SELECT id, name, quota_id, description FROM groups WHERE id = :id LIMIT 1");
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetch(\PDO::FETCH_ASSOC) ?: null;
+    }
+
+    /**
+     * Actualiza la cuota asociada al grupo.
+     * @param int $quotaId ID de la cuota a actualizar.
+     * @param string $name Nombre de la cuota.
+     * @param int $bytes Límite máximo en bytes.
+     * @return bool
+     */
+    public function updateQuota($quotaId, $name, $bytes) {
+        $sql = "UPDATE quotas SET name = :name, quota_bytes = :bytes WHERE id = :id";
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute([
+            'name' => $name,
+            'bytes' => $bytes,
+            'id' => $quotaId
+        ]);
+    }
+
+    /**
+     * Actualiza los datos básicos del grupo.
+     * @param int $id ID del grupo.
+     * @param string $name Nuevo nombre del grupo.
+     * @param string|null $description Nueva descripción.
+     * @return bool
+     */
+    public function updateGroupDetails($id, $name, $description) {
+        $sql = "UPDATE groups SET name = :name, description = :description WHERE id = :id";
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute([
+            'name' => $name,
+            'description' => $description,
+            'id' => $id
+        ]);
+    }
+
+    #### FUNCIONES DE ELIMINACIÓN ####
+
+    /**
+     * Obtiene el ID de la cuota asociada a un grupo.
+     * @param int $id ID del grupo.
+     * @return int|null
+     */
+    public function getQuotaIdByGroupId($id) {
+        $stmt = $this->pdo->prepare("SELECT quota_id FROM groups WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return $result ? (int)$result['quota_id'] : null;
+    }
+
+    /**
+     * Elimina un grupo por su ID.
      * @param int $id ID del grupo a eliminar.
      * @return bool
      */
     public function deleteGroup($id) {
         $stmt = $this->pdo->prepare("DELETE FROM groups WHERE id = :id");
         return $stmt->execute(['id' => $id]);
+    }
+
+    /**
+     * Elimina una cuota específica de la tabla quotas.
+     * @param int $quotaId ID de la cuota a eliminar.
+     * @return bool
+     */
+    public function deleteQuota($quotaId) {
+        $stmt = $this->pdo->prepare("DELETE FROM quotas WHERE id = :quotaId");
+        return $stmt->execute(['quotaId' => $quotaId]);
     }
 }

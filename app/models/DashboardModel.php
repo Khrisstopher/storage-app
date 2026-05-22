@@ -19,7 +19,9 @@ class DashboardModel {
 
     /**
      * Verificar si ya existe el nombre.
-     * @throws \PDOException
+     * @param string $name Nombre original del archivo a verificar.
+     * @param int $userId ID del usuario para el que se verifica el nombre.
+     * @return bool Retorna true si el nombre ya existe para ese usuario, false en caso contrario.
      */
     public function originalNameExists(string $name, int $userId): bool {
         $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM files WHERE user_id = ? AND original_name = ?");
@@ -28,8 +30,8 @@ class DashboardModel {
     }
 
     /**
-     * Obtener extensiones restringidas. Esto está repetido hay que centralizarlo tal vez.
-     * @throws \PDOException
+     * Obtener extensiones restringidas.
+     * @return array Lista de extensiones bloqueadas.
      */
     public function getBlockedExtensions(): array {
         $stmt = $this->pdo->query("SELECT extension FROM blocked_extensions");
@@ -38,7 +40,8 @@ class DashboardModel {
 
     /**
      * Guardar archivo.
-     * @throws \PDOException
+     * @param array $data Datos del archivo a guardar.
+     * @return int ID del archivo registrado en la base de datos.
      */
     public function save(array $data): int {
         $stmt = $this->pdo->prepare("INSERT INTO files (user_id, filename, original_name, file_size, file_type) 
@@ -55,7 +58,8 @@ class DashboardModel {
 
     /**
      * Traer el getUserExternalId.
-     * @throws \PDOException
+     * @param int $userId ID del usuario.
+     * @return string ID externo del usuario o cadena vacía si no se encuentra.
      */
     public function getUserExternalId(int $userId): string {
         $stmt = $this->pdo->prepare("SELECT external_id FROM users WHERE id = ?");
@@ -66,7 +70,8 @@ class DashboardModel {
 
     /**
      * Traer todos los archivos del usuario por id.
-     * @throws \PDOException
+     * @param int $userId ID del usuario.
+     * @return array Lista de archivos asociados al usuario.
      */
     public function findAllFiles(int $userId): array {
         $sql = "SELECT *
@@ -82,7 +87,9 @@ class DashboardModel {
 
     /**
      * Traer el archivo por id de usuario e id de archivo.
-     * @throws \PDOException
+     * @param int $fileId ID del archivo.
+     * @param int $userId ID del usuario.
+     * @return array|null Datos del archivo o null si no se encuentra.
      */
     public function findByIdAndUser(int $fileId, int $userId): ?array {
         $stmt = $this->pdo->prepare("SELECT * FROM files WHERE id = ? AND user_id = ?");
@@ -94,7 +101,8 @@ class DashboardModel {
 
     /**
      * Elimina el archivo de la BD.
-     * @throws \PDOException
+     * @param int $fileId ID del archivo a eliminar.
+     * @return bool Retorna true si la eliminación fue exitosa, false en caso contrario
      */
     public function delete(int $fileId): bool {
         $stmt = $this->pdo->prepare("DELETE FROM files WHERE id = ?");
@@ -103,7 +111,8 @@ class DashboardModel {
 
     /**
      * Traer el almacenamiento que ya ha ocupado el usuario.
-     * @throws \PDOException
+     * @param int $userId ID del usuario.
+     * @return int Tamaño total en bytes de los archivos del usuario.
      */
     public function getTotalSizeByUser(int $userId): int {
         $stmt = $this->pdo->prepare("SELECT COALESCE(SUM(file_size), 0) FROM files WHERE user_id = ?");
@@ -115,7 +124,6 @@ class DashboardModel {
      * Obtiene la cuota configurada para el usuario respetando la jerarquía desde la tabla quotas:
      * @param int $userId
      * @return int Límite de cuota en bytes o 10 MB por defecto.
-     * @throws \PDOException
      */
     public function getUserQuotaLimit(int $userId): int {
         $sql = "SELECT COALESCE(qu.quota_bytes, qg.quota_bytes, qs.quota_bytes, 10485760) as effective_quota

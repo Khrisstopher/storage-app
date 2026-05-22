@@ -1,98 +1,84 @@
 # 📦 Storage App
 
-Aplicación web de almacenamiento de archivos desarrollada en PHP puro y JavaScript Vanilla, con arquitectura MVC personalizada, sistema de autenticación, control de roles y validaciones de seguridad en el backend.
+Aplicación web avanzada de almacenamiento y gestión segura de archivos desarrollada en PHP estructurado bajo el patrón arquitectónico MVC (Model-View-Controller) personalizado y JavaScript Vanilla en el cliente. Diseñada como un proyecto de ingeniería personal para demostrar la viabilidad, optimización y control total sobre la lógica de negocio y seguridad en el backend sin depender de frameworks monolíticos pesados.
 
 ---
 
 ## 🚀 Estado del proyecto
 
-⚠️ En desarrollo activo.
+<p align="center">
+  <img src="https://img.shields.io/badge/Estado-Terminado-success?style=for-the-badge&logo=github" alt="Estado del proyecto: Terminado">
+</p>
 
-**Módulos completados:**
+<div align="center">
 
-- Sistema de autenticación (registro, login, logout)
-- Dashboard de usuario con gestión de archivos
-- Subida, listado, descarga y eliminación de archivos
-- Validación de extensiones prohibidas (incluyendo contenido de archivos ZIP)
-- Panel de administración global con restricción de extensiones
-- Gestión de cuota dinámica desde el panel de administración global
-- Límite de cuota establecido en gerarquía de usuario --> grupo --> global
+# ✅ Proyecto Finalizado
 
-**En desarrollo:**
-- Modificación de grupo del usuario
-- Modificación de cuota de usuario
-- Mostrar Grupo y cuota de usuario en lavista de Administración de usuarios
-- Eliminar usuario desde Administración de ususarios
+Este sistema ha sido completado, auditado y se encuentra totalmente funcional para entornos de desarrollo local.
+
+</div>
 
 ---
 
 ## 📌 Descripción
 
-Storage App es una aplicación web para gestionar archivos de forma segura. Los usuarios pueden subir, listar, descargar y eliminar sus archivos. El sistema aplica validaciones desde el backend: extensiones bloqueadas, inspección del contenido de ZIPs, y límite de almacenamiento por usuario.
+Storage App es una plataforma para gestionar archivos de forma eficiente y segura. Los usuarios autenticados disponen de un aislamiento completo para subir, listar, descargar y eliminar sus documentos en directorios protegidos.
 
-El proyecto fue desarrollado siguiendo una arquitectura MVC personalizada en PHP orientado a objetos, con JavaScript Vanilla (ES6+) y Fetch API para el manejo asíncrono de peticiones y renderizado dinámico de la interfaz, sin dependencia de frameworks externos.
+El núcleo de la aplicación reside en su motor de validaciones en el backend, el cual intercepta las cargas para garantizar el uso justo del almacenamiento del servidor mediante políticas dinámicas de cuotas, restricciones estrictas de tipos de archivo y un analizador de inspección binaria que audita de forma recursiva los archivos comprimidos (`.zip`) antes de conceder su persistencia.
 
 ---
 
 ## ⚙️ Tecnologías utilizadas
 
 ### Backend
-- PHP 8+ (POO Avanzada con Namespaces y Autoloading lógico)
-- MySQL
-- PDO
-- Arquitectura MVC personalizada
+- **PHP 8.0+** (Programación Orientada a Objetos Avanzada con espacios de nombres y Autoloading nativo)
+- **MySQL** (Esquema relacional optimizado con restricciones de integridad referencial en cascada)
+- **PDO (PHP Data Objects)** (Conexión segura configurada con emulación de Prepared Statements desactivada)
 
 ### Frontend
-- HTML5 / CSS3
-- JavaScript Vanilla (ES6+)
-- Fetch API
+- **JavaScript Vanilla (ES6+)** (Arquitectura basada en eventos y manipulación asíncrona del DOM)
+- **Fetch API** (Comunicación asíncrona cliente-servidor)
 
-### UI
-- Bootstrap 5
-- SweetAlert2
-- Bootstrap Icons
+### UI & Componentes
+- **Bootstrap 5** (Layout responsive y estructuración visual limpia)
+- **SweetAlert2** (Feedback UX inmediato para notificaciones dinámicas del sistema)
+- **Bootstrap Icons** (Soporte iconográfico para tipos de archivo y acciones del panel)
 
-### Entorno de desarrollo
-- XAMPP
-- Apache con `.htaccess` para URL rewriting
-
----
-
-## ✨ Funcionalidades implementadas
-
-- Registro e inicio de sesión con validaciones en backend
-- Regeneración de ID de sesión en login (protección contra session fixation)
-- Cierre de sesión con destrucción completa de cookie y sesión
-- Dashboard protegido por sesión
-- Subida de archivos con validación de extensiones bloqueadas
-- Inspección del contenido de archivos ZIP para detectar extensiones prohibidas dentro
-- Control de cuota de almacenamiento por usuario (límite de 10 MB)
-- Resolución automática de nombres duplicados (`archivo (1).pdf`, `archivo (2).pdf`, etc.)
-- Listado de archivos del usuario con iconos por tipo
-- Descarga segura de archivos (acceso verificado por sesión y propiedad)
-- Eliminación de archivos con confirmación y transacción BD + filesystem
-- Panel de administración protegido por rol
-- Configuración de extensiones bloqueadas desde el panel admin
-- Router personalizado con rutas web (vistas) y rutas API (JSON)
-- Respuestas JSON estandarizadas para todas las peticiones asíncronas
-- Separación de carpetas de almacenamiento por usuario usando `external_id` (sin exponer IDs internos)
-- Crear grupos con sus cuotas específicas y modificar los existentes
+### Servidor y Entorno
+- **Apache** (Uso de directivas `.htaccess` para el enmascaramiento de rutas mediante URL Rewriting)
+- **XAMPP / Local PHP Environment**
 
 ---
 
-## 🔐 Seguridad implementada
+## ✨ Características y Funcionalidades Principales
 
-- Contraseñas hasheadas con `password_hash()` / `password_verify()`
-- Queries con PDO y prepared statements reales (protección contra SQL injection)
-- `session_regenerate_id(true)` en cada login
-- Destrucción completa de sesión y cookie en logout
-- `external_id` aleatorio (`bin2hex(random_bytes(16))`) para aislar carpetas de usuario
-- Rutas de almacenamiento fuera del directorio `public/`
-- Validación de extensiones en el servidor (no solo en cliente)
-- Inspección recursiva del contenido de ZIPs
-- Rutas admin protegidas por autenticación + verificación de `role_id`
-- Mensajes de error genéricos al usuario (sin exponer trazas ni SQLSTATE)
-- Gestión de Sesiones Centralizada: Implementación de clase Session para mitigar errores de manipulación directa de $_SESSION.
+### Gestión y Reglas de Almacenamiento (Backend-Driven)
+- **Control Jerárquico de Cuotas (Límite de Almacenamiento):** Sistema inteligente de resolución de cuotas con prioridades escalonadas:
+  1. *Prioridad Máxima:* Límite específico asignado de forma personalizada a un usuario.
+  2. *Prioridad Media:* Límite heredado a través del Grupo al que pertenece el usuario.
+  3. *Prioridad por Defecto:* Límite del Sistema Global Inicial (configurado por defecto en 50 MB).
+- **Filtro Global de Extensiones Prohibidas:** Bloqueo perimetral en el servidor contra la subida de scripts ejecutables o potencialmente peligrosos (ej. `.exe`, `.bat`, `.js`, `.php`).
+- **Auditoría e Inspección de Archivos ZIP:** Si un usuario intenta subir un contenedor comprimido `.zip`, el backend abre temporalmente el archivo en memoria usando `ZipArchive`, itera sobre su árbol de contenidos y rechaza de forma inmediata la subida completa si detecta tan solo un archivo interno con extensión restringida.
+- **Resolución de Nombres Colisionados:** Algoritmo que evita la sobreescritura en el filesystem renombrando automáticamente archivos duplicados con sufijos incrementales (ej. `documento (1).pdf`, `documento (2).pdf`).
+
+### Panel Administrativo de Control (Roles y Grupos)
+- **Módulo de Usuarios:** Permite administrar las cuentas del sistema, asignarles cuotas dedicadas o vincularlos a equipos específicos.
+- **Módulo de Grupos:** Creación y modificación de agrupaciones organizacionales (ej. "SENA", "Premium", "Desarrolladores") asignándoles cuotas de disco compartidas para todos sus miembros.
+- **Configuración Global:** Panel unificado para cambiar el almacenamiento por defecto del sistema y añadir/remover extensiones a la lista negra del servidor.
+
+### Interfaz y Experiencia de Usuario (UX/UI)
+- **Operaciones Single Page Application (SPA) Parciales:** La subida, listado, actualización de configuraciones y eliminaciones se realizan de forma asíncrona mediante Fetch API. La interfaz procesa las respuestas del servidor en tiempo real sin recargar el navegador.
+- **Descargas Seguras Interceptadas:** Los archivos de los usuarios no se exponen con enlaces directos en la web; son servidos dinámicamente por un controlador que verifica los permisos de sesión antes de realizar el streaming de bytes.
+
+---
+
+## 🔐 Capa de Seguridad Avanzada
+
+- **Hasheo de Contraseñas:** Uso de las funciones nativas de PHP `password_hash()` y `password_verify()` para el almacenamiento y validación segura de las contraseñas de los usuarios.
+- **Prevención de Inyecciones SQL:** Erradicación total de ataques de inyección mediante la parametrización estricta de todas las consultas SQL utilizando Prepared Statements reales en PDO.
+- **Protección de Sesiones:** Mitigación de vulnerabilidades de Fijación de Sesión mediante la regeneración y destrucción forzada del ID de sesión (`session_regenerate_id(true)`) en los flujos de login y logout.
+- **Aislamiento Físico de Recursos:** El directorio raíz de almacenamiento (`storage/uploads/`) se encuentra ubicado **fuera** del directorio público web (`public/`), bloqueando cualquier intento de ejecución directa de archivos subidos desde el navegador.
+- **Seguridad por Ofuscación de Identificadores:** Las carpetas del almacenamiento físico se nombran utilizando cadenas aleatorias robustas (`external_id` autogenerado mediante bytes pseudoaleatorios criptográficamente seguros), protegiendo la identidad secuencial interna de la base de datos.
 
 ---
 
@@ -102,303 +88,128 @@ El proyecto fue desarrollado siguiendo una arquitectura MVC personalizada en PHP
 storage-app/
 │
 ├── app/
-│   │   .htaccess                             # Bloquea acceso directo a /app
-│   │
+│   ├── .htaccess                         # Bloquea el acceso HTTP directo a la lógica de la app
 │   ├── controllers/
-│   │   ├── api/                              # Controladores API (JSON)
-│   │   │   ├── AdminSettingController.php
-│   │   │   ├── AuthController.php
-│   │   │   ├── DashboardController.php
-│   │   │   ├── GroupController.php
-│   │   │   └── UserController.php
-│   │   │
-│   │   └── web/                              # Controladores para vistas
-│   │       ├── AdminSettingController.php
-│   │       ├── AuthController.php
-│   │       └── DashboardController.php
-│   │
-│   ├── core/                                 # Núcleo del mini framework MVC
-│   │   ├── Controller.php                    # Clase base de controladores
-│   │   ├── Router.php                        # Sistema de rutas y dispatcher
-│   │   ├── Session.php                       # Manejo centralizado de sesiones
-│   │   └── View.php                          # Renderizado de vistas y layouts
-│   │
-│   ├── helpers/                              # Utilidades reutilizables
-│   │   ├── FileHelper.php
-│   │   └── ResponseHelper.php                # Respuestas JSON estandarizadas
-│   │
-│   ├── models/                               # Acceso a base de datos
-│   │   ├── AdminSettingModel.php
-│   │   ├── AuthModel.php
-│   │   ├── DashboardModel.php
-│   │   ├── GroupModel.php
-│   │   └── UserModel.php
-│   │
-│   └── services/                             # Lógica de negocio
-│       ├── AdminSettingService.php
-│       ├── AuthService.php
-│       ├── DashboardService.php
-│       ├── GroupService.php
-│       ├── UserService.php
-│       │
-│       └── handlers/
-│           └── StorageHandler.php            # Gestión física del filesystem
+│   │   ├── api/                          # Controladores API que procesan y retornan JSON
+│   │   └── web/                          # Controladores Web encargados de despachar vistas HTML
+│   ├── core/                             # Componentes del mini-framework custom (Router, Session, View)
+│   ├── helpers/                          # Clases de utilidades (FileHelper, ResponseHelper)
+│   ├── models/                           # Capa de datos y abstracción de queries SQL
+│   └── services/                         # Capa de Servicios: Lógica de negocio pura y reglas del sistema
+│       └── handlers/                     # Operaciones de bajo nivel sobre el Filesystem (StorageHandler)
 │
 ├── config/
-│   ├── app.php                               # Configuración global y constantes
-│   └── db_connection.php                     # Clase Database (PDO)
+│   ├── app.php                           # Constantes de entorno y credenciales globales
+│   ├── DatabaseInstaller.php             # Script de instalación automática de base de datos y esquema
+│   └── db_connection.php                 # Clase Database para el control de la conexión PDO
 │
-├── docs/
-│   └── screenshots/                          # Capturas de pantalla del proyecto
-│       ├── adminSettings.png
-│       ├── dashboard.png
-│       ├── home.png
-│       ├── login.png
-│       └── register.png
-│
+├── docs/                                 # Documentación de soporte del sistema
 ├── logs/
-│   └── debug.log                             # Registro de errores internos
+│   └── debug.log                         # Registro y trazabilidad aislada de excepciones internas
+├── postman/                              # Colecciones de pruebas para auditoría de endpoints API
 │
-├── postman/                                  # Recursos de pruebas API
-│   ├── collections/
-│   ├── environments/
-│   ├── flows/
-│   ├── globals/
-│   │   └── workspace.globals.yaml
-│   ├── mocks/
-│   └── specs/
-│
-├── public/                                   # Único directorio público
-│   │   .htaccess                             # Rewrite rules
-│   │   index.php                             # Front controller
-│   │
-│   ├── css/
-│   │   ├── admin/
-│   │   │   └── settings.css
-│   │   │
-│   │   ├── auth/
-│   │   │   ├── home.css
-│   │   │   ├── login.css
-│   │   │   └── register.css
-│   │   │
-│   │   └── files/
-│   │       └── dashboard.css
-│   │
-│   ├── img/
-│   │   ├── KHRISM.ico
-│   │   └── KHRISM.png
-│   │
-│   └── js/
-│       │   main.js                           # Configuración global JS
-│       │
-│       ├── admin/
-│       │   ├── global_settings.js
-│       │   ├── groups.js
-│       │   └── users.js
-│       │
-│       ├── auth/
-│       │   ├── login.js
-│       │   └── register.js
-│       │
-│       └── files/
-│           └── dashboard.js
+├── public/                               # ÚNICO directorio expuesto al servidor web Apache
+│   ├── .htaccess                         # Directivas de reescritura de URLs hacia el Front Controller
+│   ├── index.php                         # Front Controller: Punto de entrada único de la aplicación
+│   ├── css/                              # Estilos modulares organizados por secciones
+│   ├── img/                              # Recursos gráficos estáticos y logotipos
+│   └── js/                               # Controladores y scripts en Javascript Vanilla (ES6+)
 │
 ├── sql/
-│   └── consultas.sql                         # Scripts SQL iniciales
-│
+│   └── consultas.sql                     # Esquema de la Base de Datos e inicialización maestra
 ├── storage/
-│   └── uploads/                              # Archivos subidos fuera del webroot
-│       ├── .gitkeep
-│       └── {external_id}/                    # Directorio aislado por usuario
-│
-├── views/
-│   │   404.php
-│   │   dashboard.php
-│   │   home.php
-│   │   login.php
-│   │   register.php
-│   │
-│   ├── admin/
-│   │   ├── global_settings.html
-│   │   ├── groups.html
-│   │   └── users.html
-│   │
-│   └── layouts/
-│       ├── admin.php                         # Layout administrativo
-│       └── main.php                          # Layout principal
-│
+│   └── uploads/                          # Almacenamiento físico privado aislado del webroot
+├── views/                                # Plantillas de las páginas y layouts modulares
 ├── .gitignore
 └── README.md
 ```
 
 ---
+## 🧠 Arquitectura de Flujo Interno
 
-## 🧠 Arquitectura
+El sistema implementa un desacoplamiento estricto de responsabilidades bajo principios arquitectónicos limpios:
 
-Arquitectura MVC personalizada implementada desde cero en PHP puro, sin frameworks externos. Inspirada en patrones de frameworks modernos como Laravel pero sin sus dependencias.
-
-### Flujo de una petición
-
-```
-index.php → Router → Controller → Service → Model → DB
-                                          ↓
-                                     StorageHandler (filesystem)
-```
-
-### Capas y responsabilidades
-
-| Capa | Responsabilidad |
-|---|---|
-| **Router** | Recibe la URL, valida el verbo HTTP y despacha al controller correcto |
-| **Controllers/web** | Verifican autenticación y renderizan vistas |
-| **Controllers/api** | Verifican autenticación/rol y retornan JSON, además de un log de error interno en logs/debug.log |
-| **Services** | Contienen toda la lógica de negocio (validaciones, reglas, orquestación) |
-| **Models** | Ejecutan las queries a la BD y retornan datos crudos |
-| **Helpers** | Funciones utilitarias estáticas reutilizables entre servicios |
-| **StorageHandler** | Gestiona las operaciones físicas sobre el filesystem |
-| **View / Layout** | Renderizan las vistas PHP con datos inyectados |
-
-### Separación de rutas
-
-El router diferencia dos tipos de rutas:
-
-- **Rutas web** → responden con vistas HTML renderizadas en el servidor
-- **Rutas API** → responden con JSON para las peticiones asíncronas del frontend
-
----
-
-## 🛠️ Instalación y configuración
-
-### Requisitos
-
-- PHP 8.0+
-- MySQL 5.7+
-- Apache con `mod_rewrite` habilitado
-- XAMPP (u otro entorno local equivalente)
-
-### Pasos
-
-1. Clonar o descomprimir el proyecto dentro del directorio de tu servidor local:
-   ```
-   /xampp/htdocs/storage-app/
-   ```
-
-2. Importar la base de datos. Crear primero la BD en tu gestor MySQL:
-   ```sql
-   CREATE DATABASE storage_app CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-   ```
-   Luego ejecutar el script `sql/consultas.sql`.
-
-3. Configurar la conexión a la base de datos en `config/app.php`:
-   ```php
-   define('DB_HOST', 'localhost');
-   define('DB_NAME', 'storage_app');
-   define('DB_USER', 'root');
-   define('DB_PASS', '');
-   ```
-
-4. Verificar que `BASE_URL` en `config/app.php` coincide con tu entorno:
-   ```php
-   define('BASE_URL', '/storage-app/public/');
-   ```
-
-5. Asegurarse de que `mod_rewrite` está activo en Apache y que el `.htaccess` de `public/` tiene permisos de lectura.
-
-6. Acceder desde el navegador:
-   ```
-   http://localhost/storage-app/public/
-   ```
-
-### Usuario administrador de prueba
-
-```
-Email:    admin@test.com
-Password: admin123
+```text
+[Petición del Cliente]
+        │
+        ▼
+public/index.php
+(Front Controller)
+        │
+        ▼
+DatabaseInstaller
+(Verificación de salud e instalación automática en frío)
+        │
+        ▼
+Router
+(Despacho analítico de verbos HTTP y URI)
+        │
+        ▼
+Controller
+(Validación de sesión, extracción de inputs y encapsulado)
+        │
+        ▼
+Service
+(Orquestación de reglas de negocio:
+ cuotas, ZIPs y extensiones)
+        │
+        ▼
+Model ─────────────────────▶ [Base de Datos MySQL]
+        │
+        ▼
+StorageHandler ───────────▶ [Filesystem Físico]
 ```
 
 ---
 
-## 🌐 Rutas Web
+## 🛠️ Instalación y Configuración Automática  
+### *(Despliegue Cero Fricciones)*
 
-| Método | Ruta | Descripción | Auth requerida |
-|---|---|---|---|
-| `GET` | `/` | Página principal | No |
-| `GET` | `/home` | Página de inicio | No |
-| `GET` | `/login` | Vista de inicio de sesión | No |
-| `GET` | `/register` | Vista de registro | No |
-| `GET` | `/dashboard` | Panel principal del usuario | Sí |
-| `GET` | `/admin/settings` | Configuración global del sistema | Admin |
-| `GET` | `/admin/groups` | Gestión de grupos | Admin |
-| `GET` | `/admin/users` | Gestión de usuarios | Admin |
+El proyecto cuenta con un **Módulo de Instalación Automatizada** que autodetecta la ausencia del esquema de datos y levanta el sistema completo la primera vez que se visita desde el navegador, eliminando la necesidad de importar archivos SQL manualmente en phpMyAdmin.
 
----
+### Pasos para iniciar el sistema
 
-## 📡 Endpoints de la API
+#### 1️⃣ Clonar o mover la carpeta del proyecto
 
-| Método | Ruta | Descripción | Auth requerida |
-|---|---|---|---|
-| `POST` | `/auth/register` | Registro de nuevo usuario | No |
-| `POST` | `/auth/login` | Inicio de sesión | No |
-| `POST` | `/auth/logout` | Cierre de sesión | Sí |
-| `GET` | `/files/list` | Listar archivos del usuario | Sí |
-| `POST` | `/files/upload` | Subir archivo | Sí |
-| `POST` | `/files/delete` | Eliminar archivo | Sí |
-| `GET` | `/files/download?id={id}` | Descargar archivo | Sí |
-| `GET` | `/global/listFileRestrictions` | Obtener extensiones bloqueadas | Admin |
-| `POST` | `/global/saveFileRestrictions` | Actualizar extensiones bloqueadas | Admin |
-| `GET` | `/global/listQuotaGlobalLimit` | Obtener el límite de cuota global | Admin |
-| `POST` | `/global/saveQuotaGlobalLimit` | Actualizar el límite de cuota global | Admin |
-| `GET` | `/groups/list` | Listar grupos | Admin |
-| `POST` | `/groups/create` | Crear grupo | Admin |
-| `PUT` | `/groups/update` | Actualizar grupo | Admin |
-| `DELETE` | `/groups/delete` | Eliminar grupo | Admin |
-| `GET` | `/users/list` | Listar usuarios | Admin |
-| `PUT` | `/users/update` | Actualizar usuario | Admin |
-| `DELETE` | `/users/delete` | Eliminar usuario | Admin |
+Mover el proyecto completo directamente al directorio público de XAMPP:
 
-Todas las respuestas tienen la estructura:
-
-```json
-{
-  "status": true,
-  "message": "Descripción del resultado",
-  "data": null
-}
+```text
+C:\xampp\htdocs\storage-app\
 ```
 
 ---
 
-## 📸 Capturas de la aplicación
+#### 2️⃣ Configuración Inicial del Entorno *(Opcional)*
 
-### 🏠 Home
-Vista principal de bienvenida.
+Abrir el archivo:
 
-![Home](docs/screenshots/home.png)
+```text
+config/app.php
+```
 
----
+Por defecto viene configurado con las credenciales estándar de XAMPP, por lo que si utilizas la configuración nativa de fábrica no necesitas modificar nada.
 
-### 🔐 Login
-Pantalla de inicio de sesión.
+```php
+define('DB_HOST', 'localhost');
+define('DB_NAME', 'storage_app');
+define('DB_USER', 'root');
+define('DB_PASS', ''); // Vacío por defecto en XAMPP
 
-![Login](docs/screenshots/login.png)
-
----
-
-### 📝 Registro
-Formulario de registro de nuevos usuarios.
-
-![Register](docs/screenshots/register.png)
-
----
-
-### 📂 Dashboard
-Panel del usuario para visualizar y gestionar sus archivos.
-
-![Dashboard](docs/screenshots/dashboard.png)
+// URL base apuntando a la carpeta pública
+define('BASE_URL', '/storage-app/public/');
+```
 
 ---
 
-### ⚙️ Panel de administración
-Configuración de extensiones de archivo restringidas. (en desarrollo)
+#### 3️⃣ Ejecutar el sistema en el navegador
 
-![Admin Settings](docs/screenshots/adminSettings.png)
+Abrir el panel de control de XAMPP e iniciar:
+
+- Apache
+- MySQL
+
+Luego acceder desde el navegador a:
+
+```text
+http://localhost/storage-app/public/
+```

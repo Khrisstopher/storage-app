@@ -255,9 +255,16 @@ async function deleteGroup(id, name) {
 
     const confirm = await Swal.fire({
         title: `¿Eliminar el grupo "${name}"?`,
-        text: 'Esta acción no se puede deshacer.',
+        html: `
+            <p>Esta acción no se puede deshacer.</p>
+            <div style="background-color: #fff3cd; color: #856404; padding: 10px; border-radius: 5px; font-size: 0.9em; margin-top: 10px; border: 1px solid #ffeeba;">
+                <strong>⚠️ Nota importante:</strong> Los usuarios que pertenecen a este grupo no se eliminarán, pero quedarán desvinculados automáticamente.
+            </div>
+        `,
         icon: 'warning',
         showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
         confirmButtonText: 'Sí, eliminar',
         cancelButtonText: 'Cancelar'
     });
