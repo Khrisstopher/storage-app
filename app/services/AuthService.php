@@ -16,7 +16,8 @@ class AuthService {
     private AuthModel $authModel;
 
     /**
-     * @param \PDO $pdo Instancia de conexión a la base de datos y carga el servicio de autennticación.
+     * Constructor del servicio de autenticación.
+     * @param \PDO $pdo Conexión PDO para la base de datos.
      */
     public function __construct(\PDO $pdo) {
         $this->authModel = new AuthModel($pdo);

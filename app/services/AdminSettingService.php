@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Models\AdminSettingModel;
+use App\Helpers\FileHelper;
 
 require_once __DIR__ . '/../models/AdminSettingModel.php';
+require_once __DIR__ . '/../helpers/FileHelper.php';
 
 /**
  * Servicio de administración de restricciones y permisos.
@@ -16,7 +18,8 @@ class AdminSettingService {
     private AdminSettingModel $adminModel;
 
     /**
-     * @param \PDO $pdo Instancia de conexión a la base de datos y carga el servicio de Administración de archivos.
+     * Constructor del servicio de administración.
+     * @param \PDO $pdo Conexión PDO para la base de datos.
      */
     public function __construct(\PDO $pdo) {
         $this->pdo = $pdo;
@@ -85,10 +88,19 @@ class AdminSettingService {
         return $extensionsArray;
     }
 
+    /**
+     * Obtiene el límite de cuota global convertido a Megabytes para la interfaz de admin.
+     * @return int Límite en MB
+     */
     public function getGlobalQuotaLimit(): int {
-        return $this->adminModel->getGlobalQuotaLimit();
+        $limitInBytes = $this->adminModel->getGlobalQuotaLimit();
+        return FileHelper::bytesToMb($limitInBytes) ?? 0;
     }
 
+    /**
+     * Procesa, valida y guarda el nuevo límite de cuota global.
+     * @param array $data Datos provenientes del formulario.
+     */
     public function updateGlobalQuota($data) {
         if (!isset($data['limit']) || $data['limit'] === '') {
             throw new \Exception('No se recibió el límite de cuota global.');
@@ -98,12 +110,38 @@ class AdminSettingService {
             throw new \Exception('El límite de cuota global debe ser un valor numérico válido.');
         }
 
-        $limit = (int) $data['limit'];
-        if ($limit <= 0) {
+        $limitMb = (int) $data['limit'];
+        if ($limitMb <= 0) {
             throw new \Exception('El límite de cuota global debe ser un número positivo.');
         }
 
-        $this->adminModel->updateGlobalQuotaLimit($limit);
-        return $limit;
+        // Convertimos los MB validados a bytes reales
+        $limitInBytes = $limitMb * 1024 * 1024;
+
+        $this->adminModel->updateGlobalQuotaLimit($limitInBytes);
+        return true;
+    }
+
+    /**
+     * Obtiene el límite de cuota para un usuario específico en Megabytes (MB),
+     * considerando su cuota personalizada, la del grupo al que pertenece o la cuota global del sistema.
+     * @param int $userId ID del usuario.
+     * @return int Límite en MB.
+     */
+    public function getUserQuotaLimit(int $userId): int {
+        $quotaInBytes = null;
+
+        $userQuota = $this->adminModel->getQuotaByUserId($userId);
+        if ($userQuota !== null) {
+            $quotaInBytes = $userQuota;
+        } else {
+            $groupQuota = $this->adminModel->getQuotaByGroupId($userId);
+            if ($groupQuota !== null) {
+                $quotaInBytes = $groupQuota;
+            } else {
+                $quotaInBytes = $this->adminModel->getGlobalQuotaLimit();
+            }
+        }
+        return (int) ($quotaInBytes / 1024 / 1024);
     }
 }

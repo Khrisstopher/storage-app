@@ -13,7 +13,7 @@ class StorageHandler {
 
     /**
      * Define la ruta base de almacenamiento y asegura la existencia del directorio.
-     * * Configura el path principal utilizando la constante ROOT_PATH y crea
+     * Configura el path principal utilizando la constante ROOT_PATH y crea
      * la estructura de carpetas necesaria con permisos de escritura.
      */
     public function __construct() {
@@ -54,7 +54,7 @@ class StorageHandler {
 
     /**
      * Elimina un archivo físico del servidor si existe.
-     * * @param string $path Ruta absoluta o relativa del archivo.
+     * @param string $path Ruta absoluta o relativa del archivo.
      * @return void
      */
     public function remove(string $path): void {

@@ -1,18 +1,7 @@
-INSERT INTO roles (name) VALUES 
-('admin'),
-('user');
+-- 1. Creamos la cuota global inicial con un límite por defecto (ej: 500 MB)
+INSERT INTO `quotas` (`id`, `name`, `quota_bytes`, `description`) 
+VALUES (1, 'Sistema Global Inicial', 524288000, 'Cuota por defecto autogenerada en la instalacion');
 
-INSERT INTO users (external_id, name, email, password, role_id)
-VALUES (
-    '0ca08814c9214b33110fc5e13c60dc7f',
-    'Admin',
-    'admin@test.com',
-    '$2y$10$hujjhVdXj3JnOq0sTQFSaeAXjvR.izHmUqVj6ArkKlfmFAWqglOAm', 
-    1
-);
-
-CREATE TABLE blocked_extensions (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  extension VARCHAR(10) NOT NULL UNIQUE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+-- 2. Creamos la fila de configuración apuntando a esa cuota
+INSERT INTO `settings` (`id`, `quota_id`) 
+VALUES (1, 1);

@@ -20,7 +20,7 @@ class AdminSettingController extends Controller {
         $this->settingsService = new AdminSettingService($pdo);
     }
 
-    public function fileRestrictions() {
+    public function listFileRestrictions() {
         try {
             $this->requireAdmin();
             $restrictions = $this->settingsService->getFileRestrictions();
@@ -32,7 +32,6 @@ class AdminSettingController extends Controller {
 
     public function saveFileRestrictions() {
         try {
-
             $this->requireAdmin();
             $data = $this->getRequestData();
 
@@ -52,7 +51,7 @@ class AdminSettingController extends Controller {
         }
     }
 
-    public function getQuotaGlobalLimit() {
+    public function listQuotaGlobalLimit() {
         try {
             $this->requireAdmin();
             $limit = $this->settingsService->getGlobalQuotaLimit();

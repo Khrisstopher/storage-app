@@ -133,6 +133,21 @@ async function loadFiles() {
 }
 
 /**
+ * Escapa caracteres especiales de HTML para prevenir ataques XSS
+ * @param {string} string 
+ * @returns {string}
+ */
+function escapeHTML(string) {
+    if (!string) return '';
+    return string
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+/**
  * Crea el elemento HTML para una tarjeta de archivo
  * @param {Object} file - Objeto con id, name y size
  * @returns {HTMLElement}
@@ -144,17 +159,19 @@ function createFileCard(file) {
     const ext = file.name.split('.').pop().toLowerCase();
     const icon = getFileIcon(ext);
     
-    // Si el tamaño es un número (bytes del input), lo formateamos. 
-    // Si ya es un string (del servidor), lo dejamos igual.
     const displaySize = typeof file.size === 'number' 
         ? (file.size / 1024).toFixed(2) + ' KB' 
         : file.size;
+
+    // Escapamos el nombre para desinfectar cualquier HTML malicioso
+    const safeName = escapeHTML(file.name);
 
     card.innerHTML = `
         <div class="d-flex align-items-center gap-3 mb-2">
             <i class="bi ${icon} fs-3"></i>
             <div class="flex-grow-1 overflow-hidden">
-                <div class="fw-semibold text-truncate">${file.name}</div>
+                <!-- Aquí inyectamos el nombre ya sanitizado de forma segura -->
+                <div class="fw-semibold text-truncate">${safeName}</div>
                 <div class="small file-size">${displaySize}</div>
             </div>
         </div>

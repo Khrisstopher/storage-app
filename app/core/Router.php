@@ -24,7 +24,10 @@ class Router {
         'login'             => ['web','App\Controllers\Web\AuthController', 'login', 'GET'],
         'register'          => ['web','App\Controllers\Web\AuthController', 'register', 'GET'],
         'dashboard'         => ['web','App\Controllers\Web\DashboardController', 'dashboard', 'GET'],
+
         'admin/settings'    => ['web','App\Controllers\Web\AdminSettingController', 'index', 'GET'],
+        'admin/groups'      => ['web','App\Controllers\Web\AdminSettingController', 'groups', 'GET'],
+        'admin/users'       => ['web','App\Controllers\Web\AdminSettingController', 'users', 'GET'],
 
         // Rutas para lógica de negocio (API)
 
@@ -39,19 +42,23 @@ class Router {
         'files/delete'  => ['api','App\Controllers\Api\DashboardController', 'delete', 'POST'],
         'files/download' => ['api', 'App\Controllers\Api\DashboardController', 'download', 'GET'],
 
-        // Rutas para configuración de administración
-        'settings/file-restrictions' => [
-            'api','App\Controllers\Api\AdminSettingController', 'fileRestrictions', 'GET'
-        ],
-        'settings/file-restrictions/save' => [
-            'api','App\Controllers\Api\AdminSettingController', 'saveFileRestrictions', 'POST'
-        ],
-        'settings/quota-global-limit/save' => [
-            'api','App\Controllers\Api\AdminSettingController', 'saveQuotaGlobalLimit', 'POST'
-        ],
-        'settings/quota-global-limit/list' => [
-            'api','App\Controllers\Api\AdminSettingController', 'getQuotaGlobalLimit', 'GET'
-        ],
+        // Rutas para configuraciones globales
+        'global/listFileRestrictions' => ['api','App\Controllers\Api\AdminSettingController', 'listFileRestrictions', 'GET'],
+        'global/saveFileRestrictions' => ['api','App\Controllers\Api\AdminSettingController', 'saveFileRestrictions', 'POST'],
+
+        'global/listQuotaGlobalLimit' => ['api','App\Controllers\Api\AdminSettingController', 'listQuotaGlobalLimit', 'GET'],
+        'global/saveQuotaGlobalLimit' => ['api','App\Controllers\Api\AdminSettingController', 'saveQuotaGlobalLimit', 'POST'],
+
+        // Rutas para gestión de grupos
+        'groups/list' => ['api','App\Controllers\Api\GroupController', 'list', 'GET'],
+        'groups/create' => ['api','App\Controllers\Api\GroupController', 'create', 'POST'],
+        'groups/update' => ['api','App\Controllers\Api\GroupController', 'update', 'PUT'],
+        'groups/delete' => ['api','App\Controllers\Api\GroupController', 'delete', 'DELETE'],
+
+        // Rutas para gestión de usuarios
+        'users/list' => ['api','App\Controllers\Api\UserController', 'list', 'GET'],
+        'users/update' => ['api','App\Controllers\Api\UserController', 'update', 'PUT'],
+        'users/delete' => ['api','App\Controllers\Api\UserController', 'delete', 'DELETE'],
     ];
 
     // No sé si esto se pueda omitir y usar el método de core/controller.php

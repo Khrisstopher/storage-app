@@ -111,33 +111,32 @@ class DashboardModel {
         return (int) $stmt->fetchColumn();
     }
 
-    /**
-     * Obtiene la cuota configurada para el usuario respetando la jerarquía:
-     * 1. Cuota específica del usuario (users.quota_bytes)
-     * 2. Cuota de su grupo (groups.quota_bytes)
-     * 3. Cuota global del sistema (settings.max_upload_size)
-     * 
+   /**
+     * Obtiene la cuota configurada para el usuario respetando la jerarquía desde la tabla quotas:
      * @param int $userId
-     * @return int Límite de cuota en bytes
+     * @return int Límite de cuota en bytes o 10 MB por defecto.
      * @throws \PDOException
      */
     public function getUserQuotaLimit(int $userId): int {
-        $sql = "SELECT COALESCE(u.quota_bytes, g.quota_bytes, s.max_upload_size, 10485760) as effective_quota
+        $sql = "SELECT COALESCE(qu.quota_bytes, qg.quota_bytes, qs.quota_bytes, 10485760) as effective_quota
                 FROM users u
+                -- Intentamos traer los bytes de la cuota directa del usuario
+                LEFT JOIN quotas qu ON u.quota_id = qu.id
+                
+                -- Intentamos traer los bytes de la cuota del grupo del usuario
                 LEFT JOIN groups g ON u.group_id = g.id
-                CROSS JOIN (
-                    SELECT max_upload_size 
-                    FROM settings 
-                    WHERE id = 1
-                ) s
+                LEFT JOIN quotas qg ON g.quota_id = qg.id
+                
+                -- Intentamos traer los bytes de la cuota global activa en settings
+                LEFT JOIN settings s ON s.id = 1
+                LEFT JOIN quotas qs ON s.quota_id = qs.id
+                
                 WHERE u.id = :user_id";
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':user_id' => $userId]);
         
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-        // Si la tabla settings está vacía o no hay registro, 10MB como fallback
         return $result ? (int)$result['effective_quota'] : (10 * 1024 * 1024);
     }
 }

@@ -9,12 +9,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const fileRestrictionsForm = document.getElementById('fileRestrictionsForm');
     const blockedExtensions = document.getElementById('blockedExtensions');
     
-    // Guardar restricciones de archivos
     if (fileRestrictionsForm) {
         fileRestrictionsForm.addEventListener('submit', saveFileRestrictions);
     }
-
-    // Cargar restricciones actuales
     if (blockedExtensions) {
         loadFileRestrictions(blockedExtensions);
     }
@@ -34,14 +31,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 
-// ##### Funciones de lógica ####
+// ##### Funciones de lógica  de configuración Global ####
 
 /**
  * Obtiene las restricciones desde el servidor y las pinta en el textarea
  */
 async function loadFileRestrictions(inputElement) {
     try {
-        const response = await fetch(window.BASE_URL + 'settings/file-restrictions');
+        const response = await fetch(window.BASE_URL + 'global/listFileRestrictions');
 
         const result = await response.json().catch(() => {
             throw new Error('Respuesta no válida del servidor');
@@ -71,7 +68,7 @@ async function saveFileRestrictions(e) {
 
     try {
 
-        const response = await fetch(window.BASE_URL + 'settings/file-restrictions/save',
+        const response = await fetch(window.BASE_URL + 'global/saveFileRestrictions',
             {
                 method: 'POST',
                 headers: {
@@ -108,14 +105,12 @@ async function saveFileRestrictions(e) {
     }
 }
 
-
 /**
  * Cargar el límite global de cuota de almacenamiento para todos los usuarios
  */
 async function loadQuotaGlobalLimit(globalQuota) {
     try {
-        const response = await fetch(window.BASE_URL + 'settings/quota-global-limit/list');
-
+        const response = await fetch(window.BASE_URL + 'global/listQuotaGlobalLimit');
         const result = await response.json().catch(() => {
             throw new Error('Respuesta no válida del servidor');
         });
@@ -143,7 +138,7 @@ async function saveQuotaGlobalLimit(e) {
     if (!newLimit) return;
 
     try {
-        const response = await fetch(window.BASE_URL + 'settings/quota-global-limit/save',
+        const response = await fetch(window.BASE_URL + 'global/saveQuotaGlobalLimit',
             {
                 method: 'POST',
                 headers: {

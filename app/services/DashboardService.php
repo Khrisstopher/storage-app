@@ -20,12 +20,22 @@ class DashboardService {
     private DashboardModel $dashboardModel;
     private StorageHandler $storage;
 
+    /**
+     * Constructor del servicio de dashboard.
+     * @param \PDO $pdo Conexión PDO para la base de datos.
+     */
     public function __construct(\PDO $pdo) {
         $this->pdo = $pdo;
         $this->dashboardModel = new DashboardModel($pdo);
         $this->storage = new StorageHandler();
     }
 
+    /**
+     * Resuelve un nombre de archivo original para evitar colisiones, agregando un sufijo numérico si es necesario.
+     * @param string $originalName El nombre original del archivo.
+     * @param int $userId ID del usuario propietario del archivo.
+     * @return string El nombre final del archivo.
+     */
     private function resolveOriginalName(string $originalName, int $userId): string {
         $info = pathinfo($originalName);
         $basename = $info['filename'];
@@ -43,6 +53,11 @@ class DashboardService {
         return $finalName;
     }
 
+    /**
+     * Valida que el usuario no exceda su cuota al subir un nuevo archivo.
+     * @param int $userId ID del usuario que sube el archivo.
+     * @param int $fileSize Tamaño del archivo que se intenta subir, en bytes.
+     */
     private function validateQuota(int $userId, int $fileSize): void {
         $used = $this->dashboardModel->getTotalSizeByUser($userId);
         
@@ -56,6 +71,11 @@ class DashboardService {
         }
     }
     
+    /**
+     * Valida el contenido de un archivo ZIP para asegurarse de que no contenga archivos con extensiones bloqueadas.
+     * @param string $tmpPath Ruta temporal del archivo ZIP a validar.
+     * @param array $blockedExtensions Lista de extensiones bloqueadas (en minúsculas, sin punto).
+     */
     private function validateZip(string $tmpPath, array $blockedExtensions): void {
 
         if (!class_exists('\ZipArchive')) {
@@ -81,6 +101,13 @@ class DashboardService {
         $zip->close();
     }
 
+    /**
+     * Sube un archivo para un usuario específico, validando la cuota y el tipo de archivo, 
+     * y guardando la información en la base de datos.
+     * @param array $file Información del archivo a subir (estructura de $_FILES).
+     * @param int $userId ID del usuario que sube el archivo.
+     * @return array Datos del archivo subido.
+     */
     public function upload(array $file, int $userId): array {
 
         if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
@@ -146,7 +173,12 @@ class DashboardService {
         ];
     }
 
-    public function listByUser(?int $userId): array {
+    /**
+     * Lista los archivos de un usuario específico.
+     * @param int $userId ID del usuario.
+     * @return array Lista de archivos del usuario.
+     */
+    public function listByUser(int $userId): array {
         if (!$userId) {
             throw new \Exception('El id de usuario es obligatorio.');
         }
@@ -167,6 +199,12 @@ class DashboardService {
         }, $files);
     }
 
+    /**
+     * Borra un archivo específico de un usuario, eliminando tanto el registro en la base de datos 
+     * como el archivo físico en el almacenamiento.
+     * @param int $fileId ID del archivo a borrar.
+     * @param int $userId ID del usuario propietario del archivo.
+     */
     public function delete(int $fileId, int $userId): void {
         $file = $this->dashboardModel->findByIdAndUser($fileId, $userId);
         $userExternalId = $this->dashboardModel->getUserExternalId($userId);
@@ -192,6 +230,13 @@ class DashboardService {
         }
     }
 
+    /**
+     * Obtiene la información de un archivo específico para su descarga, 
+     * verificando que el usuario tenga permiso para acceder a él.
+     * @param int $fileId ID del archivo a descargar.
+     * @param int $userId ID del usuario que intenta descargar el archivo.
+     * @return array Información del archivo, incluyendo la ruta absoluta para su descarga.
+     */
     public function getFileForDownload(int $fileId, int $userId): array {
         $file = $this->dashboardModel->findByIdAndUser($fileId, $userId);
         $userExternalId = $this->dashboardModel->getUserExternalId($userId);

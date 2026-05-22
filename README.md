@@ -14,17 +14,15 @@ Aplicación web de almacenamiento de archivos desarrollada en PHP puro y JavaScr
 - Dashboard de usuario con gestión de archivos
 - Subida, listado, descarga y eliminación de archivos
 - Validación de extensiones prohibidas (incluyendo contenido de archivos ZIP)
-- Router MVC personalizado con separación de rutas web y API
-- Panel de administración con restricción de extensiones
-- Sistema de roles (admin / usuario)
-- Protección de rutas por autenticación y rol
-- Gestión de cuota dinámica desde el panel de admin
+- Panel de administración global con restricción de extensiones
+- Gestión de cuota dinámica desde el panel de administración global
 - Límite de cuota establecido en gerarquía de usuario --> grupo --> global
 
 **En desarrollo:**
-- Control de cuota de almacenamiento por usuario
-- Sistema de grupos y roles avanzados
-- Lógica extendida del panel de administración
+- Modificación de grupo del usuario
+- Modificación de cuota de usuario
+- Mostrar Grupo y cuota de usuario en lavista de Administración de usuarios
+- Eliminar usuario desde Administración de ususarios
 
 ---
 
@@ -78,6 +76,7 @@ El proyecto fue desarrollado siguiendo una arquitectura MVC personalizada en PHP
 - Router personalizado con rutas web (vistas) y rutas API (JSON)
 - Respuestas JSON estandarizadas para todas las peticiones asíncronas
 - Separación de carpetas de almacenamiento por usuario usando `external_id` (sin exponer IDs internos)
+- Crear grupos con sus cuotas específicas y modificar los existentes
 
 ---
 
@@ -103,88 +102,130 @@ El proyecto fue desarrollado siguiendo una arquitectura MVC personalizada en PHP
 storage-app/
 │
 ├── app/
-│   │   .htaccess                        # Bloquea acceso directo a /app
+│   │   .htaccess                             # Bloquea acceso directo a /app
 │   │
 │   ├── controllers/
-│   │   ├── api/                         # Controladores API (respuestas JSON)
-│   │   │   ├── AdminSettingsController.php
+│   │   ├── api/                              # Controladores API (JSON)
+│   │   │   ├── AdminSettingController.php
 │   │   │   ├── AuthController.php
-│   │   │   └── FileController.php
+│   │   │   ├── DashboardController.php
+│   │   │   ├── GroupController.php
+│   │   │   └── UserController.php
 │   │   │
-│   │   └── web/                         # Controladores para renderizado de vistas
-│   │       ├── AdminSettingsController.php
-│   │       ├── DashboardController.php
-│   │       └── PageController.php
+│   │   └── web/                              # Controladores para vistas
+│   │       ├── AdminSettingController.php
+│   │       ├── AuthController.php
+│   │       └── DashboardController.php
 │   │
-│   ├── core/                            # Núcleo del mini framework MVC
-│   │   ├── Controller.php               # Clase base con métodos comunes
-│   │   ├── Router.php                   # Enrutador y dispatcher
-│   │   ├── Session.php                  # Clase Session (Nueva)
-│   │   └── View.php                     # Renderizador de vistas con layout
+│   ├── core/                                 # Núcleo del mini framework MVC
+│   │   ├── Controller.php                    # Clase base de controladores
+│   │   ├── Router.php                        # Sistema de rutas y dispatcher
+│   │   ├── Session.php                       # Manejo centralizado de sesiones
+│   │   └── View.php                          # Renderizado de vistas y layouts
 │   │
-│   ├── helpers/                         # Utilidades estáticas reutilizables
-│   │   └── FileHelper.php               # Extensión, nombre único, formato de tamaño
+│   ├── helpers/                              # Utilidades reutilizables
+│   │   ├── FileHelper.php
+│   │   └── ResponseHelper.php                # Respuestas JSON estandarizadas
 │   │
-│   ├── models/                          # Acceso a base de datos
-│   │   ├── AuthModel.php                # Queries de autenticación y usuarios
-│   │   └── FileModel.php                # Queries de archivos y extensiones bloqueadas
+│   ├── models/                               # Acceso a base de datos
+│   │   ├── AdminSettingModel.php
+│   │   ├── AuthModel.php
+│   │   ├── DashboardModel.php
+│   │   ├── GroupModel.php
+│   │   └── UserModel.php
 │   │
-│   └── services/                        # Lógica de negocio
+│   └── services/                             # Lógica de negocio
 │       ├── AdminSettingService.php
 │       ├── AuthService.php
-│       ├── FileService.php
+│       ├── DashboardService.php
+│       ├── GroupService.php
+│       ├── UserService.php
 │       │
 │       └── handlers/
-│           └── StorageHandler.php       # Gestión física del filesystem
+│           └── StorageHandler.php            # Gestión física del filesystem
 │
 ├── config/
-│   ├── app.php                          # Constantes globales (BASE_URL, ROOT_PATH)
-│   └── db_connection.php               # Clase Database con configuración PDO
+│   ├── app.php                               # Configuración global y constantes
+│   └── db_connection.php                     # Clase Database (PDO)
 │
 ├── docs/
-│   └── screenshots/                     # Capturas de pantalla de la aplicación
+│   └── screenshots/                          # Capturas de pantalla del proyecto
+│       ├── adminSettings.png
+│       ├── dashboard.png
+│       ├── home.png
+│       ├── login.png
+│       └── register.png
 │
 ├── logs/
-│   └── debug.log                        # Registro de errores internos
+│   └── debug.log                             # Registro de errores internos
 │
-├── postman/                             # Colecciones y entornos para pruebas de API
+├── postman/                                  # Recursos de pruebas API
 │   ├── collections/
 │   ├── environments/
-│   └── globals/
+│   ├── flows/
+│   ├── globals/
+│   │   └── workspace.globals.yaml
+│   ├── mocks/
+│   └── specs/
 │
-├── public/                              # Único directorio accesible desde el navegador
-│   │   .htaccess                        # Rewrite rules para el front controller
-│   │   index.php                        # Front controller — punto de entrada único
+├── public/                                   # Único directorio público
+│   │   .htaccess                             # Rewrite rules
+│   │   index.php                             # Front controller
 │   │
 │   ├── css/
 │   │   ├── admin/
+│   │   │   └── settings.css
+│   │   │
 │   │   ├── auth/
+│   │   │   ├── home.css
+│   │   │   ├── login.css
+│   │   │   └── register.css
+│   │   │
 │   │   └── files/
+│   │       └── dashboard.css
 │   │
 │   ├── img/
+│   │   ├── KHRISM.ico
+│   │   └── KHRISM.png
 │   │
 │   └── js/
+│       │   main.js                           # Configuración global JS
+│       │
 │       ├── admin/
+│       │   ├── global_settings.js
+│       │   ├── groups.js
+│       │   └── users.js
+│       │
 │       ├── auth/
-│       ├── files/
-│       └── main.js                      # Configuración global (Toast, BASE_URL, iconos)
+│       │   ├── login.js
+│       │   └── register.js
+│       │
+│       └── files/
+│           └── dashboard.js
 │
 ├── sql/
-│   └── consultas.sql                    # Scripts SQL iniciales (roles, usuario admin, tablas)
+│   └── consultas.sql                         # Scripts SQL iniciales
 │
 ├── storage/
-│   └── uploads/                         # Archivos subidos (fuera del webroot)
-│       └── {external_id}/               # Carpeta aislada por usuario
+│   └── uploads/                              # Archivos subidos fuera del webroot
+│       ├── .gitkeep
+│       └── {external_id}/                    # Directorio aislado por usuario
 │
 ├── views/
+│   │   404.php
+│   │   dashboard.php
+│   │   home.php
+│   │   login.php
+│   │   register.php
+│   │
 │   ├── admin/
-│   │   └── settings.php
-│   ├── layouts/
-│   │   └── main.php                     # Layout principal compartido
-│   ├── dashboard.php
-│   ├── home.php
-│   ├── login.php
-│   └── register.php
+│   │   ├── global_settings.html
+│   │   ├── groups.html
+│   │   └── users.html
+│   │
+│   └── layouts/
+│       ├── admin.php                         # Layout administrativo
+│       └── main.php                          # Layout principal
 │
 ├── .gitignore
 └── README.md
@@ -277,6 +318,21 @@ Password: admin123
 
 ---
 
+## 🌐 Rutas Web
+
+| Método | Ruta | Descripción | Auth requerida |
+|---|---|---|---|
+| `GET` | `/` | Página principal | No |
+| `GET` | `/home` | Página de inicio | No |
+| `GET` | `/login` | Vista de inicio de sesión | No |
+| `GET` | `/register` | Vista de registro | No |
+| `GET` | `/dashboard` | Panel principal del usuario | Sí |
+| `GET` | `/admin/settings` | Configuración global del sistema | Admin |
+| `GET` | `/admin/groups` | Gestión de grupos | Admin |
+| `GET` | `/admin/users` | Gestión de usuarios | Admin |
+
+---
+
 ## 📡 Endpoints de la API
 
 | Método | Ruta | Descripción | Auth requerida |
@@ -288,10 +344,17 @@ Password: admin123
 | `POST` | `/files/upload` | Subir archivo | Sí |
 | `POST` | `/files/delete` | Eliminar archivo | Sí |
 | `GET` | `/files/download?id={id}` | Descargar archivo | Sí |
-| `GET` | `/settings/file-restrictions` | Obtener extensiones bloqueadas | Admin |
-| `POST` | `/settings/file-restrictions/save` | Actualizar extensiones bloqueadas | Admin |
-| `GET` | `/settings/quota-global-limit/list` | Obtener el límite de cuota global | Admin |
-| `POST` | `/settings/quota-global-limit/save` | Actualizar el límite de cuota global | Admin |
+| `GET` | `/global/listFileRestrictions` | Obtener extensiones bloqueadas | Admin |
+| `POST` | `/global/saveFileRestrictions` | Actualizar extensiones bloqueadas | Admin |
+| `GET` | `/global/listQuotaGlobalLimit` | Obtener el límite de cuota global | Admin |
+| `POST` | `/global/saveQuotaGlobalLimit` | Actualizar el límite de cuota global | Admin |
+| `GET` | `/groups/list` | Listar grupos | Admin |
+| `POST` | `/groups/create` | Crear grupo | Admin |
+| `PUT` | `/groups/update` | Actualizar grupo | Admin |
+| `DELETE` | `/groups/delete` | Eliminar grupo | Admin |
+| `GET` | `/users/list` | Listar usuarios | Admin |
+| `PUT` | `/users/update` | Actualizar usuario | Admin |
+| `DELETE` | `/users/delete` | Eliminar usuario | Admin |
 
 Todas las respuestas tienen la estructura:
 

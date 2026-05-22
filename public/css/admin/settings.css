@@ -1,6 +1,4 @@
-/* =========================
-   Admin Settings - Dark Theme
-========================= */
+/* Admin Settings - Dark Theme */
 
 body {
     min-height: 100vh;
@@ -9,9 +7,7 @@ body {
     color: #f9fafb;
 }
 
-/* =========================
-   Header
-========================= */
+/* Header */
 
 .admin-title {
     font-size: 2rem;
@@ -25,9 +21,7 @@ body {
     font-size: 0.95rem;
 }
 
-/* =========================
-   Cards
-========================= */
+/* Cards */
 
 .card {
     background-color: #111827;
@@ -53,9 +47,7 @@ body {
     color: #9ca3af !important;
 }
 
-/* =========================
-   Inputs
-========================= */
+/* Inputs */
 
 .form-control {
     background-color: #1f2937 !important;
@@ -81,18 +73,14 @@ body {
     color: #f9fafb !important;
 }
 
-/* =========================
-   Labels
-========================= */
+/* Labels */
 
 .form-label {
     color: #d1d5db;
     font-size: 0.9rem;
 }
 
-/* =========================
-   Switch
-========================= */
+/* Switch */
 
 .form-check-label {
     color: #d1d5db;
@@ -108,9 +96,7 @@ body {
     background-color: #0d6efd;
 }
 
-/* =========================
-   Buttons
-========================= */
+/* Buttons */
 
 .btn {
     border-radius: 12px;
@@ -142,23 +128,70 @@ body {
     background: linear-gradient(90deg, #059669, #10b981);
 }
 
-/* =========================
-   Upcoming section
-========================= */
+/* Upcoming section */
 
 .bg-light {
     background-color: #111827 !important;
     border: 1px solid #1f2937 !important;
 }
 
-/* =========================
-   Animations
-========================= */
+/* Animations */
 
 .card {
     opacity: 0;
     transform: translateY(8px);
     animation: fadeInCard 0.4s ease forwards;
+}
+
+
+
+
+/* --- Estilos personalizados para las Tablas del Panel Dark --- */
+
+.admin-table-row:hover {
+    background-color: rgba(30, 41, 59, 0.5) !important; /* Efecto hover azulado oscuro */
+}
+
+/* Estilo del Badge de Cuota (Semejante a las tarjetas del home) */
+.badge-quota {
+    background-color: #1f2937 !important;
+    color: #f3f4f6 !important;
+    border-color: #374151 !important;
+}
+
+/* Botón Editar Personalizado (Estilo minimalista claro) */
+.btn-action-edit {
+    background: transparent;
+    color: #e5e7eb;
+    border: 1px solid #4b5563;
+    transition: all 0.2s ease;
+}
+
+.btn-action-edit:hover {
+    background-color: #e5e7eb;
+    color: #111827;
+    border-color: #e5e7eb;
+    transform: translateY(-1px);
+}
+
+/* Botón Eliminar Personalizado (Estilo peligro oscuro) */
+.btn-action-delete {
+    background: transparent;
+    color: #f87171;
+    border: 1px solid rgba(248, 113, 113, 0.4);
+    transition: all 0.2s ease;
+}
+
+.btn-action-delete:hover {
+    background-color: #ef4444;
+    color: #ffffff;
+    border-color: #ef4444;
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.3);
+    transform: translateY(-1px);
+}
+
+.btn-action-edit:active, .btn-action-delete:active {
+    transform: translateY(0);
 }
 
 @keyframes fadeInCard {
