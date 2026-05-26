@@ -110,6 +110,7 @@ class DashboardService {
      */
     public function upload(array $file, int $userId): array {
 
+        // Validar lo básico del archivo recibido
         if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
             throw new \Exception('Archivo con error o no recibido');
         }
@@ -118,6 +119,15 @@ class DashboardService {
         $tmpPath = $file['tmp_name'];
         $size = $file['size'];
 
+        // Validar límite individual por archivo
+        $maxFileBytes = $this->dashboardModel->getSingleFileLimit($userId);
+        
+        if ($size > $maxFileBytes) {
+            $maxLimitInMb = FileHelper::bytesToMb($maxFileBytes);
+            throw new \Exception("El archivo excede el tamaño máximo permitido por archivo individual ({$maxLimitInMb}MB).");
+        }
+
+        // Validar extensión bloqueada
         $extension = FileHelper::getExtension($originalName);
         $blocked = $this->dashboardModel->getBlockedExtensions();
 
@@ -125,11 +135,37 @@ class DashboardService {
             throw new \Exception("El tipo de archivo .$extension no está permitido");
         }
 
+        // Valida la cuota total del usuario antes de proceder con la subida
+        $this->validateQuota($userId, $size);
+
+        // Valida el contenido de los archivos
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $realMime = $finfo->file($tmpPath);
+
+        $mimesPeligrosos = [
+            'text/x-php', 
+            'application/x-php', 
+            'application/x-msdownload',
+            'application/x-sh', 
+            'text/javascript', 
+            'application/javascript'
+        ];
+
+        if (in_array($realMime, $mimesPeligrosos)) {
+            throw new \Exception("Seguridad: El contenido interno del archivo corresponde a un formato peligroso prohibido.");
+        }
+
+        if (($extension === 'pdf' && strpos($realMime, 'pdf') === false) ||
+            (in_array($extension, ['png', 'jpg', 'jpeg']) && strpos($realMime, 'image') === false) ||
+            ($extension === 'zip' && strpos($realMime, 'zip') === false)) {
+            throw new \Exception("Seguridad: El contenido real del archivo no coincide con la extensión .$extension.");
+        }
+
+        // Si es un ZIP, validamos su contenido antes de guardarlo
         if ($extension === 'zip') {
             $this->validateZip($tmpPath, $blocked);
         }
 
-        $this->validateQuota($userId, $size);
         $originalName = $this->resolveOriginalName($originalName, $userId);
         $newName = FileHelper::generateUniqueName($extension);
         $userExternalId = $this->dashboardModel->getUserExternalId($userId);
@@ -137,7 +173,6 @@ class DashboardService {
         $fileId = null;
         $path = null;
 
-        // Iniciamos la transacción antes de tocar la base de datos y el disco
         $this->pdo->beginTransaction();
 
         try {
@@ -245,8 +280,10 @@ class DashboardService {
             throw new \Exception('El archivo solicitado no existe o no tienes permiso para acceder a él.');
         }
 
-        // Le agregamos un nuevo índice al array con la ruta física real
         $file['absolute_path'] = $this->storage->getFilePath($userExternalId, $file['filename']);
+
+        $cleanName = str_replace(["\r", "\n"], "", basename($file['original_name']));
+        $file['safe_name'] = addslashes($cleanName);
 
         return $file;
     }

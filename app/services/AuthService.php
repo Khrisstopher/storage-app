@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Models\AuthModel;
+use App\Helpers\FileHelper;
 
 require_once __DIR__ . '/../models/AuthModel.php';
+require_once __DIR__ . '/../helpers/FileHelper.php';
 
 /**
  * Servicio de autenticación y sesión.
@@ -50,7 +52,7 @@ class AuthService {
         if ($this->authModel->emailExists($email)) throw new \Exception('El correo ya está registrado');
 
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        $userExternalId = bin2hex(random_bytes(16));
+        $userExternalId = FileHelper::generateToken();
 
         $this->authModel->createUser([
             'external_id' => $userExternalId,

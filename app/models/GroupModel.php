@@ -19,6 +19,7 @@ class GroupModel {
      * @return array Lista de grupos con detalles de cuota
      */
     public function getAllGroups() {
+        // Decidí no implementar páginación por la simplicidad del proyecto.
         $sql = "SELECT 
                     g.id, 
                     g.name, 

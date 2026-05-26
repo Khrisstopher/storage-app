@@ -18,6 +18,11 @@ const Toast = Swal.mixin({
     }
 });
 
+const getCsrfToken = () => {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+};
+
 // Para mostrar los iconos de los archivos según su extensión
 function getFileIcon(extension) {
 
@@ -45,7 +50,7 @@ function getFileIcon(extension) {
 }
 
 /**
- * Maneja los eventos globales de la aplicación, como el logout del usuario.
+ * Maneja los eventos globales de la aplicación.
  * Se ejecuta una vez que el DOM está completamente cargado.
  */
 document.addEventListener('DOMContentLoaded', () => {
@@ -80,7 +85,11 @@ async function handleLogout(e) {
 
     try {
         const response = await fetch(window.BASE_URL + 'auth/logout', {
-            method: 'POST'
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': getCsrfToken()
+            }
         });
 
         const result = await response.json().catch(() => {
@@ -89,7 +98,6 @@ async function handleLogout(e) {
 
         if (!result.status) throw new Error(result.message);
 
-        // Redirigir al login
         window.location.href = window.BASE_URL + 'login';
 
     } catch (err) {

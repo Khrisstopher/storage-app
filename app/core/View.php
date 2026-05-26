@@ -1,13 +1,15 @@
 <?php
 
 namespace App\Core;
-// Archivo central para renderizar vistas.
+
+/**
+ * Archivo encargado de renderizar vistas con un layout común.
+ * @author Khrisstopher
+ * @link https://www.linkedin.com/in/khrisstopher/
+ */
 class View {
 
     public static function render($view, $data = []) {
-        extract($data);
-
-        // Seguridad básica (evitar rutas raras)
         $view = str_replace(['..', '//'], '', $view);
 
         $viewPath = __DIR__ . '/../../views/' . $view . '.php';
@@ -19,6 +21,10 @@ class View {
         }
 
         ob_start();
+        
+        // Extracción segura
+        extract($data, EXTR_SKIP);
+
         require $viewPath;
         $content = ob_get_clean();
 

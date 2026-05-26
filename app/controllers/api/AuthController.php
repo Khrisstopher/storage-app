@@ -5,10 +5,12 @@ namespace App\Controllers\Api;
 use App\Core\Controller;
 use App\Services\AuthService;
 use App\Core\Session;
+use App\Helpers\FileHelper;
 
 require_once __DIR__ . '/../../core/Controller.php';
 require_once __DIR__ . '/../../services/AuthService.php';
 require_once __DIR__ . '/../../core/Session.php';
+require_once __DIR__ . '/../../helpers/FileHelper.php';
 
 /**
  * Controlador de autenticación.
@@ -46,6 +48,8 @@ class AuthController extends Controller {
             Session::set('role_id', $user['role_id']);
             Session::set('user_name', $user['name']);
 
+            Session::set('csrf_token', FileHelper::generateToken());
+
             $this->response(true, 'Login exitoso', $user);
         } catch (\Throwable $e) {
             $this->logError($e, "LOGIN");
@@ -54,6 +58,15 @@ class AuthController extends Controller {
     
     public function logout() {
         try {
+            if (!Session::check()) {
+                $this->response(true, 'Sesión expirada');
+                return;
+            }
+            if (!$this->isValidCSRF()) {
+                Session::destroy();
+                $this->response(true, 'Sesión cerrada por expiración de seguridad.');
+                return;
+            }
             Session::destroy();
             $this->response(true, 'Sesión cerrada correctamente');
         } catch (\Throwable $e) {

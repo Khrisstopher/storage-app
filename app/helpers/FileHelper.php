@@ -19,12 +19,20 @@ class FileHelper {
     }
 
     /**
-     * Genera un nombre único basado en microsegundos para evitar colisiones.
+     * Genera un token aleatorio criptográficamente seguro.
+     * @return string 32 caracteres hexadecimales.
+     */
+    public static function generateToken(): string {
+        return bin2hex(random_bytes(16));
+    }
+
+    /**
+     * Genera un nombre de archivo único y seguro utilizando el generador de tokens.
      * @param string $extension
      * @return string
      */
     public static function generateUniqueName(string $extension): string {
-        return uniqid('', true) . '.' . $extension;
+        return self::generateToken() . '.' . $extension;
     }
 
     /**

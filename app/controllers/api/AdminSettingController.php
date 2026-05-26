@@ -33,6 +33,7 @@ class AdminSettingController extends Controller {
     public function saveFileRestrictions() {
         try {
             $this->requireAdmin();
+            $this->checkCSRFStrict();
             $data = $this->getRequestData();
 
             if (!isset($data['extensions'])) {
@@ -64,6 +65,7 @@ class AdminSettingController extends Controller {
     public function saveQuotaGlobalLimit() {
         try {
             $this->requireAdmin();
+            $this->checkCSRFStrict();
             $data = $this->getRequestData();
 
             $result = $this->settingsService->updateGlobalQuota($data);

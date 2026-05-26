@@ -182,7 +182,8 @@ async function updateUser(e) {
         const response = await fetch(window.BASE_URL + 'users/update', {
             method: 'PUT',
             headers: { 
-                'Content-Type': 'application/json' 
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': getCsrfToken() 
             },
             body: JSON.stringify({
                 id: id,
@@ -239,11 +240,15 @@ async function confirmDeleteUser(id, name) {
     });
 
     if (!confirm.isConfirmed) return;
+
     try {
         const response = await fetch(window.BASE_URL + `users/delete/`, 
             { 
                 method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': getCsrfToken() 
+                },
                 body: JSON.stringify({ id })
             }
         );

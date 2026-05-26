@@ -33,7 +33,13 @@ async function handleUpload() {
     formData.append('file', file);
 
     try {
-        const response = await fetch(URL_UPLOAD, { method: 'POST', body: formData });
+        const response = await fetch(URL_UPLOAD, { 
+            method: 'POST', 
+            headers: {
+                'X-CSRF-TOKEN': getCsrfToken()
+            },
+            body: formData 
+        });
         const result = await response.json().catch(() => {
             throw new Error('La respuesta del servidor no es un JSON válido');
         });
@@ -87,7 +93,14 @@ async function handleDelete(e) {
     formData.append('id', id);
 
     try {
-        const response = await fetch(URL_DELETE, { method: 'POST', body: formData });
+        const response = await fetch(URL_DELETE, { 
+            method: 'DELETE', 
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': getCsrfToken() 
+            },
+            body: JSON.stringify({ id })
+        });
         const result = await response.json().catch(() => {
             throw new Error('Error al procesar respuesta del servidor');
         });

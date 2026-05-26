@@ -8,9 +8,8 @@ require_once __DIR__ . '/../../config/db_connection.php';
 require_once __DIR__ . '/Session.php';
 
 /**
- * Descripción: Controlador de rutas
- * 
- * @author @KhrisstopherTube
+ * Controlador de rutas
+ * @author Khrisstopher
  * @link https://www.linkedin.com/in/khrisstopher/
  */
 class Router {
@@ -39,7 +38,7 @@ class Router {
         // Rutas para gestión de archivos
         'files/list'    => ['api','App\Controllers\Api\DashboardController', 'list', 'GET'],
         'files/upload'  => ['api','App\Controllers\Api\DashboardController', 'upload', 'POST'],
-        'files/delete'  => ['api','App\Controllers\Api\DashboardController', 'delete', 'POST'],
+        'files/delete'  => ['api','App\Controllers\Api\DashboardController', 'delete', 'DELETE'],
         'files/download' => ['api', 'App\Controllers\Api\DashboardController', 'download', 'GET'],
 
         // Rutas para configuraciones globales
@@ -94,7 +93,6 @@ class Router {
         $parts = explode('\\', $controllerName);
         $fileName = end($parts);
 
-        // Ahora cargamos el archivo usando el nombre corto ($fileName)
         $fileContent = __DIR__ . "/../controllers/$folder/$fileName.php";
 
         if (!file_exists($fileContent)) {
@@ -103,7 +101,6 @@ class Router {
         
         require_once $fileContent;
 
-        // Verifica que la clase del controlador exista y que el método esté implementado
         if (!class_exists($controllerName)) {
             $this->jsonResponse(false, 'Controlador no encontrado' . $controllerName, 500);
         }
@@ -111,14 +108,11 @@ class Router {
             $this->jsonResponse(false, 'Método no implementado', 500);
         }
 
-        // Instanciamos la base de datos de forma uniforme para TODOS los controladores
         $database = new Database();
         $pdo = $database->getConnection();
 
-        // Instancia el controlador pasándole la conexión PDO
         $controller = new $controllerName($pdo);
 
-        // Ejecuta el método correspondiente
         $controller->$method(); 
     }
 }

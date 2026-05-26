@@ -19,6 +19,7 @@ class UserModel {
      * @return array Lista de usuarios con detalles de grupo y bytes de cuota propia o null
      */
     public function getAllUsers() {
+        // Decidí no implementar páginación por la simplicidad del proyecto.
         $sql = "SELECT 
                     u.id, 
                     u.name, 

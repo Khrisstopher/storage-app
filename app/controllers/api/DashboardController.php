@@ -39,6 +39,7 @@ class DashboardController extends Controller {
     public function upload() {
         try {
             $this->requireAuth();
+            $this->checkCSRFStrict();
 
             if (!isset($_FILES['file'])) {
                 throw new \Exception('No se recibió ningún archivo');
@@ -58,14 +59,18 @@ class DashboardController extends Controller {
     public function delete() {
         try {
             $this->requireAuth();
+            $this->checkCSRFStrict();
 
-            if (!isset($_POST['id'])) {
-                throw new \Exception('ID no recibido');
+            $data = $this->getRequestData();
+            $fileId = (int)($data['id'] ?? null);
+
+            if (!$fileId) {
+                throw new \Exception('ID no recibido o formato no válido');
             }
 
             $userId = Session::userId();
 
-            $this->dashboardService->delete((int)$_POST['id'], $userId);
+            $this->dashboardService->delete($fileId, $userId);
 
             $this->response(true, 'Archivo eliminado correctamente');
 
@@ -76,7 +81,6 @@ class DashboardController extends Controller {
 
     public function download() {
         try {
-
             $this->requireAuth();
 
             $fileId = $_GET['id'] ?? null;
@@ -90,7 +94,7 @@ class DashboardController extends Controller {
                 throw new \Exception('Archivo no encontrado o acceso denegado');
             }
 
-            // Construir ruta absoluta
+            // Ruta absoluta
             $filePath = $file['absolute_path'];
 
             if (!file_exists($filePath)) {
@@ -100,24 +104,21 @@ class DashboardController extends Controller {
             // Configuración de Headers para descarga
             header('Content-Description: File Transfer');
             header('Content-Type: application/octet-stream'); 
-            header('Content-Disposition: attachment; filename="' . $file['original_name'] . '"');
+            header('Content-Disposition: attachment; filename="' . $file['safe_name'] . '"');
             header('Expires: 0');
             header('Cache-Control: must-revalidate');
             header('Pragma: public');
             header('Content-Length: ' . filesize($filePath));
             
-            // Limpiamos el buffer para asegurar que no haya basura en el archivo
             if (ob_get_level()) {
                 ob_end_clean();
             }
             
             flush();
             
-            // Enviamos el archivo al navegador
             if (readfile($filePath) === false) {
                 throw new \Exception("Error al leer el archivo para la descarga.");
             }
-            
             exit;
 
         } catch (\Throwable $e) {

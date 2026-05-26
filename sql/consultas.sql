@@ -34,7 +34,8 @@ CREATE TABLE `quotas` (
 DROP TABLE IF EXISTS `settings`;
 CREATE TABLE `settings` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `quota_id` bigint(20) UNSIGNED NOT NULL,
+  `quota_id` bigint(20) UNSIGNED NOT NULL COMMENT 'Apunta a la cuota de almacenamiento total (id: 1)',
+  `max_file_id` bigint(20) UNSIGNED NOT NULL COMMENT 'Apunta al límite por archivo individual (id: 2)',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -89,7 +90,7 @@ CREATE TABLE `files` (
   `user_id` bigint(20) UNSIGNED NOT NULL,
   `filename` varchar(255) NOT NULL,
   `original_name` varchar(255) NOT NULL,
-  `file_size` int(11) NOT NULL,
+  `file_size` bigint(20) UNSIGNED NOT NULL,
   `file_type` varchar(100) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
@@ -102,6 +103,7 @@ CREATE TABLE `files` (
 
 ALTER TABLE `blocked_extensions` ADD PRIMARY KEY (`id`), ADD UNIQUE KEY `extension` (`extension`);
 ALTER TABLE `files` ADD PRIMARY KEY (`id`);
+ALTER TABLE `files` ADD INDEX `idx_user_id` (`user_id`);
 ALTER TABLE `groups` ADD PRIMARY KEY (`id`), ADD UNIQUE KEY `name` (`name`);
 ALTER TABLE `quotas` ADD PRIMARY KEY (`id`);
 ALTER TABLE `roles` ADD PRIMARY KEY (`id`), ADD UNIQUE KEY `name` (`name`);
@@ -128,15 +130,19 @@ INSERT INTO `roles` (`id`, `name`) VALUES
 (1, 'admin'),
 (2, 'user');
 
--- 2. Crear la cuota global inicial por defecto (ej: 50 MB = 52428800 bytes)
+-- 2. Crear la cuota global inicial por defecto (ID 1) con un límite de 50MB (52428800 bytes)
 INSERT INTO `quotas` (`id`, `name`, `quota_bytes`, `description`) 
 VALUES (1, 'Sistema Global Inicial', 52428800, 'Cuota por defecto autogenerada en la instalacion');
 
--- 3. Crear la fila única de configuraciones apuntando a esa cuota
-INSERT INTO `settings` (`id`, `quota_id`) 
-VALUES (1, 1);
+-- 3. Crear el límite inicial por archivo individual (ID: 2 | 10 MB = 10485760 bytes)
+INSERT INTO `quotas` (`id`, `name`, `quota_bytes`, `description`) 
+VALUES (2, 'Límite Archivo Individual Inicial', 10485760, 'Límite máximo por archivo único permitido en la plataforma');
 
--- 4. Crear el usuario Administrador Maestro para poder iniciar sesión por primera vez
+-- 4. Crear la fila única de configuraciones apuntando a esa cuota
+INSERT INTO `settings` (`id`, `quota_id`, `max_file_id`) 
+VALUES (1, 1, 2);
+
+-- 5. Crear el usuario Administrador Maestro para poder iniciar sesión por primera vez
 -- Correo: admin@test.com  |  Contraseña: password
 INSERT INTO `users` (`id`, `external_id`, `name`, `email`, `password`, `role_id`, `group_id`, `quota_id`) 
 VALUES (

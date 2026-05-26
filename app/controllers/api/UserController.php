@@ -34,6 +34,7 @@ class UserController extends Controller {
     public function update() {
         try {
             $this->requireAdmin();
+            $this->checkCSRFStrict();
             $data = $this->getRequestData();
             $result = $this->userService->updateUser($data);
             $this->response(true, 'Usuario actualizado correctamente', $result);
@@ -45,6 +46,7 @@ class UserController extends Controller {
     public function delete() {
         try {
             $this->requireAdmin();
+            $this->checkCSRFStrict();
             $data = $this->getRequestData();
             $result = $this->userService->deleteUser($data['id']);
             $this->response(true, 'Usuario eliminado correctamente', $result);

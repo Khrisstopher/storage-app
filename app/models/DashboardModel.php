@@ -74,6 +74,7 @@ class DashboardModel {
      * @return array Lista de archivos asociados al usuario.
      */
     public function findAllFiles(int $userId): array {
+        // Decidí no implementar páginación por la simplicidad del proyecto.
         $sql = "SELECT *
                 FROM files
                 WHERE user_id = ? 
@@ -146,5 +147,33 @@ class DashboardModel {
         
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
         return $result ? (int)$result['effective_quota'] : (10 * 1024 * 1024);
+    }
+
+    /**
+     * Obtiene el límite máximo permitido por archivo individual (en bytes)
+     * asegurando que no exceda la cuota efectiva total del usuario.
+     * @param int $userId
+     * @return int Límite por archivo en bytes.
+     */
+    public function getSingleFileLimit(int $userId): int {
+        $effectiveQuota = $this->getUserQuotaLimit($userId);
+
+        // Consultamos el límite dinámico por archivo desde settings
+        $sql = "SELECT q.quota_bytes 
+                FROM settings s
+                INNER JOIN quotas q ON s.max_file_id = q.id 
+                WHERE s.id = 1 
+                LIMIT 1";
+                
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        
+        $maxFileLimit = $result ? (int)$result['quota_bytes'] : 10 * 1024 * 1024;
+
+        if ($maxFileLimit > $effectiveQuota) {
+            return $effectiveQuota;
+        }
+        return $maxFileLimit;
     }
 }

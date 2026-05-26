@@ -36,6 +36,7 @@ class GroupController extends Controller {
     public function create() {
         try {
             $this->requireAdmin();
+            $this->checkCSRFStrict();
             $data = $this->getRequestData();
             $result = $this->groupService->createGroup($data);
             $this->response(true, 'Grupo creado correctamente', $result);
@@ -47,6 +48,7 @@ class GroupController extends Controller {
     public function update() {
         try {
             $this->requireAdmin();
+            $this->checkCSRFStrict();
             $data = $this->getRequestData();
             $result = $this->groupService->updateGroup($data);
             $this->response(true, 'Grupo actualizado correctamente', $result);
@@ -58,6 +60,7 @@ class GroupController extends Controller {
     public function delete() {
         try {
             $this->requireAdmin();
+            $this->checkCSRFStrict();
             $data = $this->getRequestData();
             $result = $this->groupService->deleteGroup($data['id']);
             $this->response(true, 'Grupo eliminado correctamente', $result);

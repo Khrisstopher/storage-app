@@ -142,7 +142,8 @@ async function createGroup(e) {
             {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': getCsrfToken()
                 },
                 body: JSON.stringify({
                     name: groupName,
@@ -210,7 +211,8 @@ async function saveEditGroup(e) {
             {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': getCsrfToken()
                 },
                 body: JSON.stringify({
                     id: groupId,
@@ -276,7 +278,8 @@ async function deleteGroup(id, name) {
             {
                 method: 'DELETE',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': getCsrfToken()
                 },
                 body: JSON.stringify({ id })
             }

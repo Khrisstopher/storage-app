@@ -9,7 +9,6 @@ require_once __DIR__ . '/Session.php';
 
 /**
  * Controlador base de funcionalidades comunes
- * 
  * @author Khrisstopher
  * @link https://www.linkedin.com/in/khrisstopher/
  */
@@ -90,5 +89,32 @@ class Controller {
         }
 
         $this->response(false, $mensajeUsuario);
+    }
+
+    /**
+     * Comprueba si el token CSRF enviado por el cliente es válido.
+     * @return bool True si coincide, false en caso contrario.
+     */
+    protected function isValidCSRF(): bool {
+        $headers = getallheaders();
+        $headers = array_change_key_case($headers, CASE_LOWER);
+
+        $clientToken = $headers['x-csrf-token'] ?? ($_POST['csrf_token'] ?? null);
+        $serverToken = Session::get('csrf_token');
+
+        if (!$clientToken || !$serverToken) {
+            return false;
+        }
+
+        return hash_equals($serverToken, $clientToken);
+    }
+
+    /**
+     * Si el token falla, mata la app con un 403.
+     */
+    protected function checkCSRFStrict() {
+        if (!$this->isValidCSRF()) {
+            $this->response(false, 'Acceso denegado: Token de seguridad inválido o expirado.', null, 403);
+        }
     }
 }

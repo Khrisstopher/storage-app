@@ -3,9 +3,8 @@
 namespace App\Core;
 
 /**
- * Descripció: Clase para manejo de sesiones y autenticación
- * 
- * @author @KhrisstopherTube
+ * Clase para manejo de sesiones y autenticación
+ * @author Khrisstopher
  * @link https://www.linkedin.com/in/khrisstopher/
  */
 class Session {
@@ -32,7 +31,6 @@ class Session {
         return isset($_SESSION['user_id']);
     }
 
-    // Azúcar sintáctico para datos comunes
     public static function userId() { return self::get('user_id'); }
     public static function userName() { return self::get('user_name'); }
     public static function userRole() { return self::get('role_id'); }
@@ -42,7 +40,6 @@ class Session {
         session_regenerate_id(true);
     }
 
-    // Cerrar sesión completamente
     public static function destroy() {
         self::init();
         $_SESSION = [];

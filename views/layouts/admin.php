@@ -39,7 +39,7 @@
         <div class="tab-pane fade show active" role="tabpanel">
             <?php 
                 // Cargamos dinámicamente la sub-vista específica enviada por el controlador
-                require __DIR__ . '/../' . $subView . '.html'; 
+                require __DIR__ . '/../' . $subView . '.php'; 
             ?>
         </div>
     </div>

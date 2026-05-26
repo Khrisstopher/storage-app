@@ -1,3 +1,6 @@
+<?php
+    $csrfToken = \App\Core\Session::check() ? \App\Core\Session::get('csrf_token') : null;
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,6 +9,11 @@
 
     <!-- Ruta base -->
     <base href="<?= BASE_URL ?>">
+
+    <?php if ($csrfToken): ?>
+        <meta name="csrf-token" content="<?= $csrfToken ?>">
+    <?php endif; ?>
+
     <title><?= $title ?? 'Storage App' ?></title>
     <link rel="shortcut icon" href="img/KHRISM.ico">
 
