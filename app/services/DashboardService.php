@@ -20,6 +20,15 @@ class DashboardService {
     private DashboardModel $dashboardModel;
     private StorageHandler $storage;
 
+    private const MIMES_PELIGROSOS = [
+        'text/x-php', 
+        'application/x-php', 
+        'application/x-msdownload',
+        'application/x-sh', 
+        'text/javascript', 
+        'application/javascript'
+    ];
+
     /**
      * Constructor del servicio de dashboard.
      * @param \PDO $pdo Conexión PDO para la base de datos.
@@ -88,16 +97,34 @@ class DashboardService {
             throw new \Exception('No se pudo analizar el archivo ZIP');
         }
 
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $fileInside = $zip->getNameIndex($i);
-            $extInside = strtolower(pathinfo($fileInside, PATHINFO_EXTENSION));
 
+            if (substr($fileInside, -1) === '/') {
+                continue;
+            }
+
+            $extInside = strtolower(pathinfo($fileInside, PATHINFO_EXTENSION));
             if (in_array($extInside, $blockedExtensions)) {
                 $zip->close();
                 throw new \Exception("El archivo '$fileInside' dentro del ZIP no está permitido");
             }
-        }
 
+            $streamPath = "zip://" . realpath($tmpPath) . "#" . $fileInside;
+            $realMimeInside = $finfo->file($streamPath);
+
+            if (in_array($realMimeInside, self::MIMES_PELIGROSOS)) {
+                $zip->close();
+                throw new \Exception("Seguridad: El archivo '$fileInside' dentro del ZIP contiene código o un formato peligroso prohibido.");
+            }
+
+            if (in_array($extInside, ['png', 'jpg', 'jpeg']) && strpos($realMimeInside, 'image') === false) {
+                $zip->close();
+                throw new \Exception("Seguridad: El archivo '$fileInside' dentro del ZIP tiene extensión de imagen pero su contenido real es diferente.");
+            }
+        }
         $zip->close();
     }
 
@@ -142,16 +169,7 @@ class DashboardService {
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
         $realMime = $finfo->file($tmpPath);
 
-        $mimesPeligrosos = [
-            'text/x-php', 
-            'application/x-php', 
-            'application/x-msdownload',
-            'application/x-sh', 
-            'text/javascript', 
-            'application/javascript'
-        ];
-
-        if (in_array($realMime, $mimesPeligrosos)) {
+        if (in_array($realMime, self::MIMES_PELIGROSOS)) {
             throw new \Exception("Seguridad: El contenido interno del archivo corresponde a un formato peligroso prohibido.");
         }
 
