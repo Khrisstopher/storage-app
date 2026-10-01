@@ -10,7 +10,7 @@
 ---
 
 ## 🎬 Demo
-📹 *[Ver demo aquí](https://youtu.be/019ITk9PQdQ)*
+📹 [Ver demo aquí](https://youtu.be/019ITk9PQdQ)
 ---
 
 ## 📸 Capturas de Pantalla
@@ -110,4 +110,10 @@ http://localhost/storage-app/public/
 
 ## Autor
 
-**Khrisstopher** · [LinkedIn](https://www.linkedin.com/in/khrisstopher/)
+**Cristofer Castro Arias**
+
+[WhatsApp](https://wa.me/573005352422)
+
+[YouTube](https://www.youtube.com/@KhrisstopherTube)
+
+---
