@@ -17,7 +17,7 @@
 | Vista Principal | Panel de Control |
 | :---: | :---: |
 | ![Vista 1](docs/screenshots/Responsive_mode.gif) | ![Vista 2](./docs/screenshots/Upload_file.gif) |
-| ![Vista 3](./docs/screenshots/panel.gif) | ![Vista 4](./docs/screenshots/Home.png) |
+| ![Vista 3](./docs/screenshots/panel.gif) | ![Vista 4](./docs/screenshots/home.png) |
 | ![Vista 5](./docs/screenshots/register.png) | ![Vista 6](./docs/screenshots/login.png) |
 ---
 
