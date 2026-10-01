@@ -10,7 +10,10 @@
 ---
 
 ## 🎬 Demo
-📹 [Ver demo aquí](https://youtu.be/019ITk9PQdQ)
+
+- 🌐 [Probar la app en vivo](https://moralesk2026.infinityfreeapp.com/)
+- 📹 [Ver demo en video](https://youtu.be/019ITk9PQdQ)
+
 ---
 
 ## 📸 Capturas de Pantalla
