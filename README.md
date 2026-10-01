@@ -10,10 +10,15 @@
 ---
 
 ## 🎬 Demo
+📹 *[Ver demo aquí](https://youtu.be/019ITk9PQdQ)*
+---
 
-<!-- Reemplaza esta línea con tu enlace de YouTube, Drive o un GIF animado -->
-> 📹 *Video demostrativo — [Ver demo aquí](https://youtu.be/vh4NMOIztbA)*
-
+## 📸 Capturas de Pantalla
+| Vista Principal | Panel de Control |
+| :---: | :---: |
+| ![Vista 1](docs/screenshots/Responsive_mode.gif) | ![Vista 2](./docs/screenshots/Upload_file.gif) |
+| ![Vista 3](./docs/screenshots/panel.gif) | ![Vista 4](./docs/screenshots/Home.png) |
+| ![Vista 5](./docs/screenshots/register.png) | ![Vista 6](./docs/screenshots/login.png) |
 ---
 
 ## ¿Qué hace esta app?
