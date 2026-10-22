@@ -119,4 +119,6 @@ http://localhost/storage-app/public/
 
 [YouTube](https://www.youtube.com/@KhrisstopherTube)
 
+[Email](mailto:moralesk2026@outlook.com)
+
 ---
